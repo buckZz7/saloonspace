@@ -124,8 +124,15 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 </head>
 <body>
 <div id="app"></div>
-<script type="module">
-import { generatePrivateKey, getPublicKey, finishEvent, SimplePool, nip19 } from 'https://esm.sh/nostr-tools@1.17.0';
+<script>
+// Dynamic import to load nostr-tools, then init
+import('https://esm.sh/nostr-tools@1.17.0').then(m => {
+  window.__NT = m;
+  startApp();
+}).catch(e => { document.getElementById('app').innerHTML = '<div style="color:#c0392b;padding:40px;text-align:center">Failed to load Nostr library: ' + e.message + '</div>'; });
+
+function startApp() {
+const { generatePrivateKey, getPublicKey, finishEvent, SimplePool, nip19 } = window.__NT;
 const { npubEncode, nsecEncode } = nip19;
 function nsecDecode(nsec) { return nip19.decode(nsec); }
 
@@ -533,6 +540,7 @@ window.finishKeyBackup=finishKeyBackup;window.showKeys=showKeys;window.copyNsec=
 window.toggleSidebar=toggleSidebar;window.switchTab=switchTab;window.saveProfile=saveProfile;
 
 init();
+} // end startApp
 </script>
 </body>
 </html>
