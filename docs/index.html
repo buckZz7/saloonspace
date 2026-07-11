@@ -8,7 +8,16 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Rye&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://unpkg.com/nostr-tools/lib/nostr.bundle.js"></script>
+<script type="module">
+import { generatePrivateKey, getPublicKey, npubEncode, nsecEncode, nsecDecode, finishEvent, SimplePool } from 'https://esm.sh/nostr-tools@1.17.0';
+
+window.NostrTools = { generatePrivateKey, getPublicKey, npubEncode, nsecEncode, nsecDecode, finishEvent, SimplePool };
+window.__nostrLoaded = true;
+window.dispatchEvent(new Event('nostr-ready'));
+</script>
+<script>
+// Wait for module to load before running app
+window.addEventListener('nostr-ready', () => { if (typeof init === 'function') init(); });
 <style>
 :root {
   --bg: #1a1410;
@@ -437,10 +446,17 @@ function escapeHtml(str) {
 }
 
 // --- Init ---
-if (loadUser()) {
-  loadGroups().then(() => render());
-} else {
-  render();
+function init() {
+  if (loadUser()) {
+    loadGroups().then(() => render());
+  } else {
+    render();
+  }
+}
+
+// Start if nostr already loaded, otherwise wait for event
+if (window.__nostrLoaded) {
+  init();
 }
 </script>
 </body>
