@@ -8,16 +8,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Rye&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script type="module">
-import { generatePrivateKey, getPublicKey, npubEncode, nsecEncode, nsecDecode, finishEvent, SimplePool } from 'https://esm.sh/nostr-tools@1.17.0';
-
-window.NostrTools = { generatePrivateKey, getPublicKey, npubEncode, nsecEncode, nsecDecode, finishEvent, SimplePool };
-window.__nostrLoaded = true;
-window.dispatchEvent(new Event('nostr-ready'));
-</script>
-<script>
-// Wait for module to load before running app
-window.addEventListener('nostr-ready', () => { if (typeof init === 'function') init(); });
 <style>
 :root {
   --bg: #1a1410;
@@ -141,7 +131,8 @@ body {
 
 <div id="app"></div>
 
-<script>
+<script type="module">
+import { generatePrivateKey, getPublicKey, npubEncode, nsecEncode, nsecDecode, finishEvent, SimplePool } from 'https://esm.sh/nostr-tools@1.17.0';
 // --- State ---
 let state = {
   user: null,
@@ -170,24 +161,24 @@ function toggleTheme() {
 
 // --- Nostr ---
 async function initPool() {
-  if (!pool) pool = new NostrTools.SimplePool();
+  if (!pool) pool = new SimplePool();
 }
 
 async function generateKey() {
-  const sk = NostrTools.generatePrivateKey();
-  const pk = NostrTools.getPublicKey(sk);
-  return { sk, pk, npub: NostrTools.npubEncode(pk), nsec: NostrTools.nsecEncode(sk) };
+  const sk = generatePrivateKey();
+  const pk = getPublicKey(sk);
+  return { sk, pk, npub: npubEncode(pk), nsec: nsecEncode(sk) };
 }
 
 async function loginWithKey(nsec) {
   try {
-    const sk = NostrTools.nsecDecode(nsec);
-    const pk = NostrTools.getPublicKey(sk.data);
-    return { sk: sk.data, pk, npub: NostrTools.npubEncode(pk) };
+    const sk = nsecDecode(nsec);
+    const pk = getPublicKey(sk.data);
+    return { sk: sk.data, pk, npub: npubEncode(pk) };
   } catch(e) {
     try {
-      const pk = NostrTools.getPublicKey(nsec);
-      return { sk: nsec, pk, npub: NostrTools.npubEncode(pk) };
+      const pk = getPublicKey(nsec);
+      return { sk: nsec, pk, npub: npubEncode(pk) };
     } catch(e2) {
       return null;
     }
@@ -197,7 +188,7 @@ async function loginWithKey(nsec) {
 // --- Groups (NIP-28 channels) ---
 async function createGroup(name, about) {
   await initPool();
-  const event = NostrTools.finishEvent({
+  const event = finishEvent({
     kind: 40,
     content: JSON.stringify({ name, about, picture: '', relays: RELAYS }),
     tags: [],
@@ -232,7 +223,7 @@ async function fetchMessages(channelId) {
 
 async function sendMessage(channelId, text) {
   await initPool();
-  const event = NostrTools.finishEvent({
+  const event = finishEvent({
     kind: 42,
     content: text,
     tags: [['e', channelId, RELAYS[0], 'root']],
@@ -454,10 +445,16 @@ function init() {
   }
 }
 
-// Start if nostr already loaded, otherwise wait for event
-if (window.__nostrLoaded) {
-  init();
-}
+// Expose functions to window for onclick handlers
+window.toggleTheme = toggleTheme;
+window.selectGroup = selectGroup;
+window.sendMsg = sendMsg;
+window.showCreateGroup = showCreateGroup;
+window.createAccount = createAccount;
+window.loginExisting = loginExisting;
+
+// Start
+init();
 </script>
 </body>
 </html>
