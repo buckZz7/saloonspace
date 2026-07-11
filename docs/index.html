@@ -140,7 +140,8 @@ function nsecDecode(nsec) { return nip19.decode(nsec); }
 let state = {
   user: null, groups: [], activeGroup: null, activeChannel: null,
   channels: {}, messages: [], view: 'onboard', sidebarTab: 'groups',
-  sidebarOpen: false, showProfile: false, dms: [], activeDM: null,
+  sidebarOpen: false, showProfile: false, viewingProfile: null, dms: [], activeDM: null,
+  profiles: {},
   theme: localStorage.getItem('saloon-theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'),
 };
 const RELAYS = ['wss://relay.damus.io', 'wss://nos.lol', 'wss://relay.nostr.band'];
@@ -155,9 +156,9 @@ async function initPool(){if(!pool)pool=new SimplePool()}
 async function generateKey(){const sk=generatePrivateKey();const pk=getPublicKey(sk);return{sk,pk,npub:npubEncode(pk),nsec:nsecEncode(sk)}}
 async function loginWithKey(nsec){try{const d=nsecDecode(nsec);const pk=getPublicKey(d.data);return{sk:d.data,pk,npub:npubEncode(pk)}}catch(e){try{const pk=getPublicKey(nsec);return{sk:nsec,pk,npub:npubEncode(pk)}}catch(e2){return null}}}
 
-async function publishProfile(name,about,picture){
+async function publishProfile(name,about,picture,link,isAgent){
   await initPool();
-  const event=finishEvent({kind:0,content:JSON.stringify({name,about,picture:picture||'',nip05:''}),tags:[],created_at:Math.floor(Date.now()/1000)},state.user.sk);
+  const event=finishEvent({kind:0,content:JSON.stringify({name,about,picture:picture||'',link:link||'',isAgent:isAgent||false,nip05:''}),tags:[],created_at:Math.floor(Date.now()/1000)},state.user.sk);
   try{await Promise.any(pool.publish(RELAYS,event))}catch(e){console.warn('publish',e)}
 }
 
@@ -254,6 +255,7 @@ function render(){
   if(state.view==='onboard'||!state.user){app.innerHTML=renderOnboard();return}
   if(state.view==='keybackup'){app.innerHTML=renderKeyBackup();return}
   if(state.showProfile){app.innerHTML=renderMain()+renderProfileModal();return}
+  if(state.viewingProfile){app.innerHTML=renderMain()+renderViewProfileModal();return}
   app.innerHTML=renderMain();
   scrollMessages();
 }
@@ -366,11 +368,18 @@ function renderChatArea(){
 
 function renderMessages(){
   if(!state.messages.length)return '<div style="color:var(--text-tertiary);text-align:center;padding:40px">No messages yet. Say howdy.</div>';
-  return state.messages.map(m=>`
+  return state.messages.map(m=>{
+    const isOwn=m.author===state.user.pk;
+    const name=isOwn?(state.user.name||'You'):(state.profiles[m.author]?.name||m.author.slice(0,8)+'…');
+    const pic=state.profiles[m.author]?.picture;
+    const isAgent=state.profiles[m.author]?.isAgent;
+    const avatar=pic?`<img src="${escapeHtml(pic)}" style="width:24px;height:24px;border-radius:50%;object-fit:cover;margin-right:4px;" onerror="this.style.display='none'">`:`<span style="width:24px;height:24px;border-radius:50%;background:var(--bg-elevated);display:inline-flex;align-items:center;justify-content:center;font-size:.7em;margin-right:4px;border:1px solid var(--border)">${escapeHtml(name[0]?.toUpperCase()||'?')}</span>`;
+    return `
     <div class="msg">
-      <div class="author">${m.author.slice(0,8)}…${m.isBot?'<span class="bot-tag">BOT</span>':''}<span class="time">${m.time.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</span></div>
+      <div class="author">${avatar}<span style="cursor:pointer" onclick="viewProfile('${m.author}')">${escapeHtml(name)}</span>${isAgent?'<span class="agent-tag">AGENT</span>':''}<span class="time">${m.time.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</span></div>
       <div class="content">${escapeHtml(m.content)}</div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 function renderKeyBackup(){
@@ -403,6 +412,7 @@ function renderProfileModal(){
     <div class="field"><label>Display name</label><input type="text" id="profName" value="${escapeHtml(state.user.name||'')}"></div>
     <div class="field"><label>About</label><textarea id="profAbout" placeholder="Something about yourself...">${escapeHtml(state.user.about||'')}</textarea></div>
     <div class="field"><label>Avatar URL (optional)</label><input type="text" id="profPic" value="${escapeHtml(state.user.picture||'')}" placeholder="https://..."></div>
+    <div class="field"><label>Link (optional)</label><input type="text" id="profLink" value="${escapeHtml(state.user.link||'')}" placeholder="https://yoursite.com"></div>
     <div class="field"><label>Are you an agent?</label>
       <select id="profAgent" style="width:100%;background:var(--bg-elevated);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:6px;font-family:inherit">
         <option value="no" ${!state.user.isAgent?'selected':''}>I'm human</option>
@@ -412,6 +422,31 @@ function renderProfileModal(){
     <div class="btns">
       <button class="cancel" onclick="closeProfile()">Cancel</button>
       <button class="save" onclick="saveProfile()">Save</button>
+    </div>
+  </div></div>`;
+}
+
+function renderViewProfileModal(){
+  const p=state.viewingProfile;if(!p)return'';
+  const name=state.profiles[p]?.name||p.slice(0,12)+'…';
+  const about=state.profiles[p]?.about||'No about set.';
+  const pic=state.profiles[p]?.picture;
+  const link=state.profiles[p]?.link;
+  const isAgent=state.profiles[p]?.isAgent;
+  const avatar=pic?`<img src="${escapeHtml(pic)}" style="width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid var(--border)" onerror="this.style.display='none'">`:`<div style="width:64px;height:64px;border-radius:50%;background:var(--bg-elevated);display:flex;align-items:center;justify-content:center;font-size:2em;border:2px solid var(--border)">${escapeHtml(name[0]?.toUpperCase()||'?')}</div>`;
+  return `<div class="profile-modal"><div class="panel">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+      ${avatar}
+      <div>
+        <div style="font-weight:700;font-size:1.1em">${escapeHtml(name)}${isAgent?' <span class="agent-tag">AGENT</span>':''}</div>
+        <div style="font-size:.75em;color:var(--text-tertiary);font-family:monospace;word-break:break-all">${npubEncode(p)}</div>
+      </div>
+    </div>
+    <div style="margin-bottom:12px;font-size:.9em;color:var(--text-secondary)">${escapeHtml(about)}</div>
+    ${link?`<div style="margin-bottom:12px"><a href="${escapeHtml(link)}" target="_blank" style="color:var(--accent-bright);font-size:.9em;text-decoration:none">${escapeHtml(link)}</a></div>`:''}
+    <div class="btns">
+      <button class="cancel" onclick="closeViewProfile()">Close</button>
+      ${p!==state.user.pk?'<button class="save" onclick="startDM(\''+p+'\')">Send DM</button>':''}
     </div>
   </div></div>`;
 }
@@ -456,7 +491,9 @@ async function selectChannel(groupId,channelId){
   state.activeGroup=groupId;state.activeChannel=channelId;state.activeDM=null;state.sidebarOpen=false;
   const ch=(state.channels[groupId]||[]).find(c=>c.id===channelId);
   state.activeChannelName=ch?.name||'general';state.activeChannelDesc=ch?.about||'';
-  state.messages=await fetchMessages(channelId);subscribeMessages(channelId);render();
+  state.messages=await fetchMessages(channelId);
+  await fetchMessageProfiles();
+  subscribeMessages(channelId);render();
 }
 
 async function selectDM(pubkey){
@@ -515,15 +552,51 @@ function showKeys(){state.view='keybackup';render()}
 function openProfile(){state.showProfile=true;render()}
 function closeProfile(){state.showProfile=false;render()}
 
+async function viewProfile(pubkey){
+  state.viewingProfile=pubkey;
+  if(!state.profiles[pubkey]){
+    const prof=await fetchProfile(pubkey);
+    state.profiles[pubkey]=prof;
+    if(pubkey===state.user.pk)state.profiles[pubkey]={...prof,...state.user};
+  }
+  render();
+}
+function closeViewProfile(){state.viewingProfile=null;render()}
+
+function startDM(pubkey){
+  state.viewingProfile=null;
+  const dms=JSON.parse(localStorage.getItem('saloon-dms')||'[]');
+  if(!dms.find(d=>d.pubkey===pubkey)){
+    const name=state.profiles[pubkey]?.name||npubEncode(pubkey).slice(0,16);
+    dms.push({pubkey,name});
+    localStorage.setItem('saloon-dms',JSON.stringify(dms));
+  }
+  state.sidebarTab='dms';
+  selectDM(pubkey);
+}
+
 async function saveProfile(){
   const name=document.getElementById('profName')?.value||'';
   const about=document.getElementById('profAbout')?.value||'';
   const picture=document.getElementById('profPic')?.value||'';
+  const link=document.getElementById('profLink')?.value||'';
   const isAgent=document.getElementById('profAgent')?.value==='yes';
-  state.user={...state.user,name,about,picture,isAgent};
+  state.user={...state.user,name,about,picture,link,isAgent};
   saveUser();
-  await publishProfile(name,about,picture);
+  state.profiles[state.user.pk]={name,about,picture,link,isAgent};
+  await publishProfile(name,about,picture,link,isAgent);
   state.showProfile=false;render();
+}
+
+async function fetchMessageProfiles(){
+  const authors=new Set(state.messages.map(m=>m.author));
+  for(const pk of authors){
+    if(!state.profiles[pk]){
+      if(pk===state.user.pk){state.profiles[pk]={name:state.user.name,about:state.user.about,picture:state.user.picture,link:state.user.link,isAgent:state.user.isAgent};continue}
+      const prof=await fetchProfile(pk);
+      state.profiles[pk]=prof||{};
+    }
+  }
 }
 
 // --- Init ---
@@ -539,6 +612,7 @@ window.showNewDM=showNewDM;window.createAccount=createAccount;window.loginExisti
 window.finishKeyBackup=finishKeyBackup;window.showKeys=showKeys;window.copyNsec=copyNsec;
 window.toggleSidebar=toggleSidebar;window.switchTab=switchTab;window.saveProfile=saveProfile;
 window.openProfile=openProfile;window.closeProfile=closeProfile;
+window.viewProfile=viewProfile;window.closeViewProfile=closeViewProfile;window.startDM=startDM;
 
 init();
 } // end startApp
