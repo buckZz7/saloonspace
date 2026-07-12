@@ -618,7 +618,7 @@ function renderMain(){
       <div class="sidebar-backdrop ${state.sidebarOpen?'mobile-open':''}" onclick="toggleSidebar()"></div>
       <div class="sidebar ${state.sidebarOpen?'mobile-open':''}">
         <div class="sidebar-header">
-          <h1>🤠 The SaloonSpace</h1>
+          <h1>The SaloonSpace</h1>
           <button class="theme-toggle" onclick="toggleTheme()">${state.theme==='dark'?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>'}</button>
         </div>
         <div class="profile-section">
@@ -657,7 +657,7 @@ function renderGroupsTab(){
         (state.channels[g.id]||[]).forEach(c=>{totalUnread+=getUnreadCount(c.id)});
         return `
         <div class="group-item ${state.activeGroup===g.id?'active':''}" onclick="selectGroup('${g.id}')">
-          <span class="gicon">🤠</span>
+          <span class="gicon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
           <span class="gname"><span class="saloon-name-link" onclick="event.stopPropagation();openSettings('${g.id}')">${escapeHtml(g.name)}</span></span>
           <span class="expand">${(state.channels[g.id]||[]).length>0?'▾':''}</span>
           ${totalUnread>0?`<span class="unread-dot"></span>`:''}
@@ -683,7 +683,7 @@ function renderDMsTab(){
   if(q)filtered=dms.filter(d=>(d.name||d.npub||'').toLowerCase().includes(q));
   return `<div class="search-box"><input type="text" placeholder="Search DMs..." value="${escapeHtml(state.dmSearchQuery)}" oninput="onDMSearchInput(this.value)"></div><div class="dm-list">${filtered.map(d=>`
     <div class="dm-item ${state.activeDM===d.pubkey?'active':''}" onclick="selectDM('${d.pubkey}')">
-      <span>💬</span><span style="font-size:.9em">${escapeHtml(d.name||d.npub.slice(0,12))}</span>
+      <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span><span style="font-size:.9em">${escapeHtml(d.name||d.npub.slice(0,12))}</span>
     </div>
   `).join('')||'<div style="padding:16px;text-align:center"><div style="color:var(--text-tertiary);font-size:.9em;margin-bottom:12px">No DMs yet.</div><button class="create-btn" style="width:auto;padding:10px 20px" onclick="showNewDMModal()">+ Start a DM</button></div>'}</div>`;
 }
@@ -693,7 +693,7 @@ function renderChatArea(){
     return `
       <div class="chat-header">
         <div style="display:flex;align-items:center;">
-          <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+          <button class="mobile-menu-btn" onclick="toggleSidebar()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
           <div><div class="channel-name"># ${escapeHtml(state.activeChannelName||'general')}</div>
           <div class="channel-desc">${escapeHtml(state.activeChannelDesc||'')}</div></div>
         </div>
@@ -711,8 +711,8 @@ function renderChatArea(){
     return `
       <div class="chat-header">
         <div style="display:flex;align-items:center;">
-          <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
-          <div class="channel-name">💬 ${escapeHtml(state.activeDMName||'DM')}</div>
+          <button class="mobile-menu-btn" onclick="toggleSidebar()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+          <div class="channel-name"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>${escapeHtml(state.activeDMName||'DM')}</div>
         </div>
       </div>
       <div class="messages" id="messages">${renderMessages()}</div>
@@ -724,10 +724,10 @@ function renderChatArea(){
   }
   return `
     <div style="display:flex;flex-direction:column;height:100%">
-      <div class="chat-header"><div style="display:flex;align-items:center"><button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button><div class="channel-name">Howdy, welcome on in 👋</div></div></div>
+      <div class="chat-header"><div style="display:flex;align-items:center"><button class="mobile-menu-btn" onclick="toggleSidebar()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button><div class="channel-name">Howdy, welcome on in</div></div></div>
       <div style="display:flex;align-items:center;justify-content:center;flex:1;color:var(--text-tertiary);padding:24px">
         <div style="text-align:center;max-width:320px">
-          <div style="font-size:3em;margin-bottom:12px">🤠</div>
+          <div style="margin-bottom:12px"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:.4"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
           ${state.groups.length===0
             ? '<div style="margin-bottom:8px">Create a saloon to get started.</div><div style="font-size:.85em">Your saloon is where the conversation happens.</div>'
             : '<div style="margin-bottom:8px">Pick a saloon to start chatting.</div><div style="font-size:.85em">Select one from the sidebar.</div>'}
