@@ -385,7 +385,7 @@ let state = {
   editingMessageId: null, reactions: {}, typingUsers: {},
   mentionQuery: null, atBottom: true,
   replyingTo: null, replyingToContent: null, showMembersPanel: false,
-  channelSearchQuery: '', showSettingsPage: false,
+  channelSearchQuery: '', showChannelSearch: false, showSettingsPage: false,
 };
 const RELAYS = ['wss://relay.damus.io', 'wss://nos.lol', 'wss://relay.nostr.band'];
 let pool = null; let sub = null;
@@ -907,7 +907,7 @@ function renderChatArea(){
           <button class="header-btn" onclick="openMembersPanel()" title="Members">${membersIcon}</button>
         </div>
       </div>
-      ${state.channelSearchQuery!==''?`<div class="channel-search-bar"><input type="text" id="channelSearchInput" placeholder="Search messages..." value="${escapeHtml(state.channelSearchQuery)}" oninput="onChannelSearchInput(this.value)"><button class="clear-search" onclick="clearChannelSearch()">✕</button></div>`:''}
+      ${state.showChannelSearch?`<div class="channel-search-bar"><input type="text" id="channelSearchInput" placeholder="Search messages..." value="${escapeHtml(state.channelSearchQuery)}" oninput="onChannelSearchInput(this.value)"><button class="clear-search" onclick="clearChannelSearch()">✕</button></div>`:''}
       ${renderPinnedMessage()}
       <div class="messages" id="messages">${renderMessages()}</div>
       <div class="typing-indicator" id="typingIndicator" style="display:none"></div>
@@ -1586,14 +1586,13 @@ function closeMembersPanel(){state.showMembersPanel=false;render()}
 
 // --- Channel search ---
 function toggleChannelSearch(){
-  if(state.channelSearchQuery!==''){
-    state.channelSearchQuery='';
-  } else {
-    state.channelSearchQuery=' ';
-  }
+  state.showChannelSearch=!state.showChannelSearch;
+  if(!state.showChannelSearch)state.channelSearchQuery='';
   render();
-  const el=document.getElementById('channelSearchInput');
-  if(el){el.focus()}
+  if(state.showChannelSearch){
+    const el=document.getElementById('channelSearchInput');
+    if(el){el.focus()}
+  }
 }
 function onChannelSearchInput(val){
   state.channelSearchQuery=val;
@@ -1603,6 +1602,7 @@ function onChannelSearchInput(val){
 }
 function clearChannelSearch(){
   state.channelSearchQuery='';
+  state.showChannelSearch=false;
   render();
 }
 function highlightSearch(html,query){
@@ -1632,8 +1632,9 @@ async function saveSettingsPage(){
   const about=document.getElementById('settingsAbout')?.value||'';
   const picture=document.getElementById('settingsAvatar')?.value||'';
   const link=document.getElementById('settingsLink')?.value||'';
-  const agentToggle=document.querySelector('.toggle-switch.on');
-  const isAgent=!!document.querySelector('.settings-section .toggle-row .toggle-switch.on');
+  // Check agent toggle: first toggle-switch in first settings-section (Profile section)
+  const agentToggle=document.querySelector('.settings-section .toggle-row .toggle-switch');
+  const isAgent=agentToggle?agentToggle.classList.contains('on'):false;
   state.user={...state.user,name,about,picture,link,isAgent};
   saveUser();
   state.profiles[state.user.pk]={name,about,picture,link,isAgent};
@@ -1772,7 +1773,7 @@ async function init(){
   // Back button closes modals/sidebar before navigating away
   window.addEventListener('popstate',()=>{
     if(state.showProfile||state.viewingProfile||state.showCreateGroupModal||state.showCreateChannelModal||state.showNewDMModal||state.showSettingsModal){
-      state.showProfile=false;state.viewingProfile=null;state.showCreateGroupModal=false;state.showCreateChannelModal=false;state.showNewDMModal=false;state.showSettingsModal=false;render();
+      state.showProfile=false;state.viewingProfile=null;state.showCreateGroupModal=false;state.showCreateChannelModal=false;state.showNewDMModal=false;state.showSettingsModal=false;state.showMembersPanel=false;state.replyingTo=null;state.replyingToContent=null;if(state.view==='settings')state.view='app';render();
       history.pushState(null,'',location.href);
     } else if(state.sidebarOpen){
       state.sidebarOpen=false;render();
