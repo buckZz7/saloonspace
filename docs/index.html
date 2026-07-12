@@ -161,7 +161,7 @@ body{
 [data-theme="light"] .dm-item.active{background:rgba(0,0,0,.06)}
 
 .sidebar-footer{padding:12px 16px;border-top:1px solid var(--border)}
-.create-btn{width:100%;padding:8px 12px;background:transparent;color:var(--text-secondary);border-radius:var(--radius-md);cursor:pointer;font-size:.8em;font-family:inherit;transition:all .15s ease}
+.create-btn{width:100%;padding:8px 12px;background:transparent;color:var(--text-secondary);border:none;border-radius:var(--radius-md);cursor:pointer;font-size:.8em;font-family:inherit;transition:all .15s ease}
 .create-btn:hover{color:var(--accent);background:var(--bg-hover)}
 .create-btn:active{transform:scale(.97)}
 
@@ -193,19 +193,19 @@ body{
 
 .onboard{max-width:440px;margin:80px auto;padding:32px;text-align:center}
 .onboard h1{font-family:'Rye',serif;font-size:2.8em;color:var(--accent-bright);margin-bottom:8px;letter-spacing:.5px}
-.onboard p{color:var(--text-secondary);margin-bottom:28px}
+.onboard p{color:var(--text-secondary);margin-bottom:16px}
 .onboard .field{margin-bottom:16px;text-align:left}
 .onboard label{display:block;font-size:.85em;color:var(--text-secondary);margin-bottom:4px}
 .onboard input{width:100%;background:var(--bg-elevated);border:1px solid var(--border);color:var(--text);padding:12px 16px;border-radius:var(--radius-md);font-size:.95em;font-family:inherit;transition:border-color .2s ease,box-shadow .2s ease}
 .onboard input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(212,160,23,.12)}
-.onboard button{background:var(--accent);color:#000;border:none;padding:12px 32px;border-radius:var(--radius-md);font-weight:600;cursor:pointer;font-size:1em;margin-top:8px;transition:all .15s ease}
+.onboard button{background:var(--accent);color:#000;border:none;padding:12px 32px;border-radius:var(--radius-md);font-weight:600;cursor:pointer;font-size:1em;margin-top:0;transition:all .15s ease}
 .onboard button:hover{background:var(--accent-bright)}
 .onboard button:active{transform:scale(.97)}
 .onboard .or{color:var(--text-tertiary);font-size:.85em;margin:16px 0}
 .onboard .secondary{background:transparent;color:var(--text-secondary);border:1px solid var(--border)}
 .onboard .secondary:hover{border-color:var(--accent);color:var(--accent);background:transparent}
-.onboard .toggle-link{display:block;color:var(--text-tertiary);font-size:.85em;cursor:pointer;margin-top:20px;text-decoration:none;transition:color .15s ease}
-.onboard .toggle-link:hover{color:var(--accent)}
+.onboard .toggle-link{display:block;color:var(--accent);font-size:.85em;cursor:pointer;margin-top:16px;text-decoration:underline;transition:filter .15s ease,color .15s ease}
+.onboard .toggle-link:hover{color:var(--accent-bright);filter:brightness(1.15)}
 .onboard .existing-account{display:none;margin-top:16px}
 .onboard .existing-account.open{display:block}
 .onboard .key-display{background:var(--bg-elevated);border:1px solid var(--border);padding:12px;border-radius:var(--radius-md);font-family:monospace;font-size:.8em;word-break:break-all;text-align:left;margin:12px 0;box-shadow:inset 0 1px 3px rgba(0,0,0,.1)}
@@ -217,7 +217,7 @@ body{
 .onboard .copy-btn{display:inline-flex;align-items:center;gap:6px;padding:12px 24px;margin-top:8px;background:var(--accent);color:#000;border:none;border-radius:var(--radius-md);font-weight:600;cursor:pointer;font-size:1em;transition:all .15s ease}
 .onboard .copy-btn:hover{background:var(--accent-bright)}
 .onboard .copy-btn:active{transform:scale(.97)}
-.onboard .solid-btn{background:var(--accent);color:#000;border:none;padding:14px 32px;border-radius:var(--radius-md);font-weight:700;cursor:pointer;font-size:1.05em;margin-top:16px;width:100%;transition:all .15s ease}
+.onboard .solid-btn{background:var(--accent);color:#000;border:none;padding:14px 32px;border-radius:var(--radius-md);font-weight:700;cursor:pointer;font-size:1.05em;margin-top:0;width:100%;transition:all .15s ease}
 .onboard .solid-btn:hover{background:var(--accent-bright)}
 .onboard .solid-btn:active{transform:scale(.97)}
 
@@ -239,8 +239,9 @@ body{
 .profile-modal .cancel{background:transparent;color:var(--text-secondary);border:1px solid var(--border)}
 .profile-modal .cancel:hover{border-color:var(--text-secondary)}
 
-.search-box{padding:6px 8px;margin-bottom:4px}
-.search-box input{width:100%;background:var(--bg-hover);border:1px solid transparent;color:var(--text);padding:6px 10px;border-radius:20px;font-size:.82em;font-family:inherit;transition:border-color .2s ease}
+.search-box{padding:6px 8px;margin-bottom:4px;position:relative}
+.search-box .search-icon{position:absolute;left:16px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:var(--text-tertiary);pointer-events:none}
+.search-box input{width:100%;background:var(--bg-hover);border:1px solid transparent;color:var(--text);padding:6px 10px 6px 32px;border-radius:20px;font-size:.82em;font-family:inherit;transition:border-color .2s ease}
 .search-box input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(212,160,23,.12)}
 
 .msg{margin-bottom:14px;display:flex;gap:10px;align-items:flex-start}
@@ -427,6 +428,17 @@ body{
 /* Loading skeleton shimmer */
 .skeleton-bar{height:40px;margin:8px 0;border-radius:var(--radius-sm);background:linear-gradient(90deg,var(--bg-elevated) 25%,var(--bg-hover) 50%,var(--bg-elevated) 75%);background-size:200% 100%;animation:shimmer 1.5s ease-in-out infinite}
 @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* Compact empty state */
+.empty-state-content{padding-top:60px;text-align:center;max-width:320px;margin:0 auto;color:var(--text-tertiary)}
+.empty-state-content .empty-icon{margin-bottom:8px}
+.empty-state-content .empty-icon svg{opacity:.5}
+.empty-state-content .empty-title{font-size:.85em;margin-bottom:4px}
+.empty-state-content .empty-sub{font-size:.72em}
+
+/* Disabled message input bar (empty state) */
+.msg-input.disabled{opacity:.5;pointer-events:none}
+.msg-input.disabled input,.msg-input.disabled textarea{cursor:not-allowed}
 </style>
 </head>
 <body>
@@ -1022,7 +1034,7 @@ function renderGroupsTab(){
     return tb-ta;
   });
   return `
-    <div class="search-box"><input type="text" placeholder="Search saloons..." value="${escapeHtml(state.searchQuery)}" oninput="onSearchInput(this.value)"></div>
+    <div class="search-box"><svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" placeholder="Search saloons..." value="${escapeHtml(state.searchQuery)}" oninput="onSearchInput(this.value)"></div>
     <div class="groups-list">
       ${groups.map(g=>{
         let totalUnread = 0;
@@ -1101,7 +1113,7 @@ function renderDMsTab(){
   const q=(state.dmSearchQuery||'').toLowerCase();
   let filtered=dms;
   if(q)filtered=dms.filter(d=>(d.name||d.npub||'').toLowerCase().includes(q));
-  return `<div class="search-box"><input type="text" placeholder="Search DMs..." value="${escapeHtml(state.dmSearchQuery)}" oninput="onDMSearchInput(this.value)"></div><div class="dm-list">${filtered.map(d=>`
+  return `<div class="search-box"><svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" placeholder="Search DMs..." value="${escapeHtml(state.dmSearchQuery)}" oninput="onDMSearchInput(this.value)"></div><div class="dm-list">${filtered.map(d=>`
     <div class="dm-item ${state.activeDM===d.pubkey?'active':''}" onclick="selectDM('${d.pubkey}')">
       <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span><span style="font-size:.9em">${escapeHtml(d.name||d.npub.slice(0,12))}</span>
     </div>
@@ -1153,14 +1165,18 @@ function renderChatArea(){
   }
   return `
     <div style="display:flex;flex-direction:column;height:100%">
-      <div class="chat-header"><div style="display:flex;align-items:center"><button class="mobile-menu-btn" onclick="mobileMenuClick()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button><div class="channel-name">Howdy, partner 🤠</div></div></div>
-      <div style="display:flex;align-items:center;justify-content:center;flex:1;color:var(--text-tertiary);padding:60px 24px max(24px,env(safe-area-inset-bottom))">
-        <div style="text-align:center;max-width:320px">
-          <div style="margin-bottom:10px"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+      <div class="chat-header"><div style="display:flex;align-items:center"><button class="mobile-menu-btn" onclick="mobileMenuClick()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button><div class="channel-name">SaloonSpace</div></div></div>
+      <div style="flex:1;overflow-y:auto;padding:0 24px">
+        <div class="empty-state-content">
+          <div class="empty-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+          <div class="empty-title">Howdy, partner 🤠</div>
           ${state.groups.length===0
-            ? '<div style="margin-bottom:6px;font-size:.85em">Create a saloon to get started.</div><div style="font-size:.72em">Your saloon is where the conversation happens.</div>'
-            : '<div style="margin-bottom:6px;font-size:.85em">Pick a saloon to start chatting.</div><div style="font-size:.72em">Select one from the sidebar.</div>'}
+            ? '<div class="empty-sub">Create a saloon to get started.</div>'
+            : '<div class="empty-sub">Pick a saloon to start chatting.</div>'}
         </div>
+      </div>
+      <div class="msg-input disabled">
+        <input type="text" placeholder="Select a saloon to start messaging" disabled>
       </div>
     </div>`;
 }
@@ -1240,7 +1256,7 @@ function renderKeyBackup(){
 function renderOnboard(){
   return `<div class="onboard">
     <h1>SaloonSpace</h1>
-    <p>Decentralized chat for humans and agents. Pick a name and you're in — we'll handle the crypto.</p>
+    <p>Group chat for humans and agents. Pick a name and you're in.</p>
     <div class="field"><label>Display name</label><input type="text" id="displayName" placeholder="Howdy, I'm..."></div>
     <button class="solid-btn" onclick="createAccount()">Generate new account</button>
     <a class="toggle-link" onclick="toggleExistingAccount()">Already have a Nostr account?</a>
