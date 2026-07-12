@@ -196,31 +196,26 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 </style>
 </head>
 <body>
-<div id="app"><div class="onboard" style="opacity:1;transition:opacity .3s">
-  <h1>The SaloonSpace</h1>
-  <p>Decentralized group chat for humans and agents. No KYC, no central server. Just walk in.</p>
-  <div class="field"><label>Display name</label><input type="text" id="displayName" placeholder="Howdy, I'm..."></div>
-  <button onclick="__doCreate()" id="createBtn" disabled style="opacity:.5">Generate new account</button>
-  <div class="or">— or —</div>
-  <div class="field"><label>Sign in with nsec</label><input type="password" id="nsecInput" placeholder="nsec1..."></div>
-  <button class="secondary" onclick="__doLogin()" id="loginBtn" disabled style="opacity:.5">Sign in</button>
-  <div id="loadingNote" style="color:var(--text-tertiary);font-size:.8em;margin-top:16px">Loading…</div>
-</div></div>
+<div id="app"><div id="loader" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background:var(--bg)">
+  <div style="font-size:4em;margin-bottom:24px;animation:swing 1.2s ease-in-out infinite">🚪🤠🚪</div>
+  <div style="font-family:'Rye',serif;color:var(--accent-bright);font-size:1.4em;margin-bottom:20px">The SaloonSpace</div>
+  <div style="width:200px;height:4px;background:var(--bg-elevated);border-radius:2px;overflow:hidden">
+    <div style="width:30%;height:100%;background:var(--accent-bright);border-radius:2px;animation:loadbar 1.5s ease-in-out infinite"></div>
+  </div>
+  <div id="loadingNote" style="color:var(--text-tertiary);font-size:.8em;margin-top:16px">Swingin' the doors open…</div>
+</div>
+<style>
+@keyframes swing{0%,100%{transform:rotate(-8deg)}50%{transform:rotate(8deg)}}
+@keyframes loadbar{0%{width:10%}50%{width:70%}100%{width:10%}}
+</style>
+</div>
 <script>
-// Render onboarding instantly. Load nostr-tools in the background.
-// If user already has an account, jump straight to the app.
+// Show loader instantly. Load nostr-tools in background.
+// If user already has an account, jump straight to the app once loaded.
 import('https://cdn.jsdelivr.net/npm/nostr-tools@1.17.0/+esm').then(m => {
   window.__NT = m;
-  var cb=document.getElementById('createBtn');var lb=document.getElementById('loginBtn');
-  if(cb){cb.disabled=false;cb.style.opacity=1}
-  if(lb){lb.disabled=false;lb.style.opacity=1}
-  var ln=document.getElementById('loadingNote');if(ln)ln.remove();
   startApp();
 }).catch(e => { document.getElementById('app').innerHTML = '<div style="color:#c0392b;padding:40px;text-align:center">Failed to load: ' + e.message + '</div>'; });
-
-// Placeholder handlers — will be replaced by startApp once loaded
-window.__doCreate = function() { alert('Still loading, one sec…'); };
-window.__doLogin = function() { alert('Still loading, one sec…'); };
 
 function startApp() {
 const { generatePrivateKey, getPublicKey, finishEvent, SimplePool, nip19 } = window.__NT;
