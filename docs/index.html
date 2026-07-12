@@ -623,7 +623,7 @@ function renderMain(){
         </div>
         <div class="profile-section">
           <div style="display:flex;align-items:center;gap:10px;cursor:pointer" onclick="openProfile()">
-            <span class="avatar" style="margin-right:0">${(state.user.name||'?')[0].toUpperCase()}</span>
+            <span class="avatar" style="margin-right:0;background:${avatarBg(state.user.pk)};color:#fff;border:none">${(state.user.name||'?')[0].toUpperCase()}</span>
             <div style="flex:1;min-width:0">
               <div class="pname">${escapeHtml(state.user.name||'Anon')}</div>
               <div class="npub" style="cursor:pointer" onclick="event.stopPropagation();copyNpub()" title="Click to copy">${state.user.npub.slice(0,12)}…</div>
@@ -747,7 +747,7 @@ function renderMessages(){
     // Message grouping: same author within 5 min
     const prev=state.messages[i-1];
     const grouped=prev&&prev.author===m.author&&(m.time-prev.time)<300000&&!m.edited;
-    const avatar=pic?`<div class="avatar"><img src="${escapeHtml(pic)}" onerror="this.style.display='none';this.parentElement.textContent='${escapeHtml(name[0]?.toUpperCase()||'?')}'"></div>`:`<div class="avatar">${escapeHtml(name[0]?.toUpperCase()||'?')}</div>`;
+    const avatar=pic?`<div class="avatar"><img src="${escapeHtml(pic)}" onerror="this.style.display='none';this.parentElement.textContent='${escapeHtml(name[0]?.toUpperCase()||'?')}'"></div>`:`<div class="avatar" style="background:${avatarBg(m.author)};color:#fff;border:none">${escapeHtml(name[0]?.toUpperCase()||'?')}</div>`;
     // Reactions
     const reacts=(state.reactions[m.id]||[]);
     const emojiCounts={};
@@ -825,7 +825,7 @@ function renderViewProfileModal(){
   const pic=state.profiles[p]?.picture;
   const link=state.profiles[p]?.link;
   const isAgent=state.profiles[p]?.isAgent;
-  const avatar=pic?`<img src="${escapeHtml(pic)}" style="width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid var(--border)" onerror="this.style.display='none'">`:`<div style="width:64px;height:64px;border-radius:50%;background:var(--bg-elevated);display:flex;align-items:center;justify-content:center;font-size:2em;border:2px solid var(--border)">${escapeHtml(name[0]?.toUpperCase()||'?')}</div>`;
+  const avatar=pic?`<img src="${escapeHtml(pic)}" style="width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid var(--border)" onerror="this.style.display='none'">`:`<div style="width:64px;height:64px;border-radius:50%;background:${avatarBg(p)};color:#fff;display:flex;align-items:center;justify-content:center;font-size:2em;border:none">${escapeHtml(name[0]?.toUpperCase()||'?')}</div>`;
   return `<div class="profile-modal"><div class="panel">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
       ${avatar}
@@ -934,6 +934,17 @@ function renderMentionPopup(){
 
 // --- Actions ---
 function escapeHtml(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML}
+function avatarColor(pubkey){
+  // Generate consistent color from pubkey hash
+  let hash=0;for(let i=0;i<pubkey.length;i++)hash=pubkey.charCodeAt(i)+((hash<<5)-hash);
+  const h=Math.abs(hash)%360;
+  return `hsl(${h},45%,35%)`;
+}
+function avatarBg(pubkey){
+  const c=avatarColor(pubkey);
+  const h=Math.abs(pubkey.split('').reduce((a,c)=>a+c.charCodeAt(0),0))%360;
+  return `linear-gradient(135deg, hsl(${h},45%,30%), hsl(${(h+30)%360},45%,40%))`;
+}
 
 async function createAccount(){const key=await generateKey();const name=document.getElementById('displayName')?.value||'';state.user={...key,name};saveUser();state.view='keybackup';render();loadGroups()}
 function finishKeyBackup(){state.view='app';render()}
