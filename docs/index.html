@@ -112,6 +112,9 @@ body{
 .channel-item:hover{color:var(--text);background:rgba(212,160,23,.06)}
 .channel-item.active{color:var(--accent-bright);font-weight:600;background:rgba(212,160,23,.1)}
 .channel-item::before{content:'# '}
+.mute-btn{transition:opacity .15s ease}
+.channel-item:hover .mute-btn{opacity:1!important}
+.mute-btn.muted{opacity:.6}
 
 .dm-item{padding:10px 16px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:background .2s ease,transform .15s ease;-webkit-user-select:none;user-select:none}
 .dm-item:hover{background:var(--bg-hover)}
@@ -845,6 +848,7 @@ function getTotalUnread(type) {
   return total;
 }
 function incrementUnread(channelId) {
+  if(isChannelMuted(channelId))return;
   if(state.activeChannel===channelId)return;
   const cur = parseInt(localStorage.getItem('saloon-unread-'+channelId)||'0');
   localStorage.setItem('saloon-unread-'+channelId, String(cur+1));
@@ -984,20 +988,21 @@ function renderChannels(groupId){
       tables.push(c);
     }
   }
+  const muteIcon=(cId,muted)=>`<span class="mute-btn ${muted?'muted':''}" onclick="event.stopPropagation();toggleMuteChannel('${cId}')" title="${muted?'Unmute':'Mute'} channel" style="cursor:pointer;font-size:.85em;color:${muted?'var(--text-tertiary)':'var(--text-secondary)'};opacity:${muted?'1':'.4'};text-decoration:${muted?'line-through':'none'};margin-left:4px;padding:0 2px;flex-shrink:0">🔔</span>`;
+  const renderChannelItem=(c)=>{
+    const unread=getUnreadCount(c.id);
+    const muted=isChannelMuted(c.id);
+    const mutedStyle=muted?'opacity:.5;':'';
+    return `<div class="channel-item ${state.activeChannel===c.id?'active':''}" onclick="selectChannel('${groupId}','${c.id}')" style="display:flex;justify-content:space-between;align-items:center;${mutedStyle}">${escapeHtml(c.name)}<span style="display:flex;align-items:center;gap:2px">${muteIcon(c.id,muted)}${unread>0&&!muted?`<span class="unread-badge">${unread>99?'99+':unread}</span>`:''}</span></div>`;
+  };
   let html='<div class="channels-list">';
   if(tables.length>0){
     html+='<div class="channel-category">Tables</div>';
-    html+=tables.map(c=>{
-      const unread=getUnreadCount(c.id);
-      return `<div class="channel-item ${state.activeChannel===c.id?'active':''}" onclick="selectChannel('${groupId}','${c.id}')" style="display:flex;justify-content:space-between;align-items:center">${escapeHtml(c.name)}${unread>0?`<span class="unread-badge">${unread>99?'99+':unread}</span>`:''}</div>`;
-    }).join('');
+    html+=tables.map(renderChannelItem).join('');
   }
   if(backRoom.length>0){
     html+='<div class="channel-category">Back Room</div>';
-    html+=backRoom.map(c=>{
-      const unread=getUnreadCount(c.id);
-      return `<div class="channel-item ${state.activeChannel===c.id?'active':''}" onclick="selectChannel('${groupId}','${c.id}')" style="display:flex;justify-content:space-between;align-items:center">${escapeHtml(c.name)}${unread>0?`<span class="unread-badge">${unread>99?'99+':unread}</span>`:''}</div>`;
-    }).join('');
+    html+=backRoom.map(renderChannelItem).join('');
   }
   html+=`<div class="channel-item" style="color:var(--text-tertiary)" onclick="showCreateChannelModal('${groupId}')">+ add table</div></div>`;
   return html;
@@ -1842,6 +1847,8 @@ function onMessagesScroll(){const el=document.getElementById('messages');if(!el)
 async function sendMsg(){
   const input=document.getElementById('msgText');const text=input?.value.trim();
   if(!text)return;
+  // Request notification permission on first message send
+  requestNotificationPermission();
   // Clear typing indicator immediately
   if(typingTimer){clearTimeout(typingTimer);typingTimer=null}
   if(state.editingMessageId){
@@ -1931,6 +1938,23 @@ async function init(){
   } else {
     render();
   }
+  // Keyboard shortcuts
+  document.addEventListener('keydown',(e)=>{
+    // Escape closes modals/panels (works even inside inputs)
+    if(e.key==='Escape'){
+      closeAllModals();
+      return;
+    }
+    // Ctrl+K toggles channel search — don't interfere with typing in inputs
+    if((e.ctrlKey||e.metaKey)&&e.key==='k'){
+      const tag=(e.target?.tagName||'').toLowerCase();
+      if(tag==='input'||tag==='textarea')return;
+      e.preventDefault();
+      if(state.activeChannel){
+        toggleChannelSearch();
+      }
+    }
+  });
 }
 
 window.toggleTheme=toggleTheme;window.selectGroup=selectGroup;window.selectChannel=selectChannel;
@@ -1966,6 +1990,8 @@ window.openMembersPanel=openMembersPanel;window.closeMembersPanel=closeMembersPa
 window.toggleChannelSearch=toggleChannelSearch;window.onChannelSearchInput=onChannelSearchInput;window.clearChannelSearch=clearChannelSearch;
 // Settings page
 window.openSettingsPage=openSettingsPage;window.closeSettingsPage=closeSettingsPage;window.saveSettingsPage=saveSettingsPage;
+// Channel mute
+window.toggleMuteChannel=toggleMuteChannel;
 
 // Replace placeholder handlers with real ones
 window.__doCreate = createAccount;
