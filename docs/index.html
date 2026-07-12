@@ -94,6 +94,7 @@ body{
 .sidebar-tab:hover{color:var(--text-secondary)}
 .sidebar-tab.active{color:var(--accent-bright);border-bottom:3px solid var(--accent)}
 .sidebar-tab:active{background:rgba(0,0,0,.05)}
+.tab-badge{background:var(--danger);color:#fff;border-radius:10px;font-size:.65em;padding:1px 6px;font-weight:700;margin-left:4px;vertical-align:middle}
 
 .groups-list{flex:1;overflow-y:auto;padding:4px 0;scroll-behavior:smooth;-webkit-overflow-scrolling:touch}
 .group-item{padding:10px 16px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:background .2s ease,transform .15s ease,padding-left .2s ease;-webkit-user-select:none;user-select:none}
@@ -310,14 +311,23 @@ async function initPool(){
     relayStatus='connecting';
     if(typeof render!=='undefined')render();
     pool=new SimplePool();
-    // Test relay connection
     try{
       const test=await pool.list(RELAYS,[{kinds:[1],limit:1}]);
       relayStatus='connected';
     }catch(e){
-      relayStatus='connected'; // still mark as connected, pool may work even if list fails
+      relayStatus='connected';
     }
     if(typeof render!=='undefined')render();
+    // Auto-retry: check connection every 30s
+    setInterval(async()=>{
+      if(!pool)return;
+      try{
+        await pool.list(RELAYS,[{kinds:[1],limit:1}]);
+        if(relayStatus!=='connected'){relayStatus='connected';render()}
+      }catch(e){
+        if(relayStatus!=='disconnected'){relayStatus='disconnected';render()}
+      }
+    },30000);
   }
 }
 
@@ -583,8 +593,16 @@ function getUnreadCount(channelId) {
   if(state.activeChannel===channelId)return 0;
   const lastRead = getLastRead(channelId);
   if(!state.messages.length)return 0;
-  // We don't have per-channel messages cached, so use stored unread counts
   return parseInt(localStorage.getItem('saloon-unread-'+channelId)||'0');
+}
+function getTotalUnread(type) {
+  let total=0;
+  if(type==='groups'){
+    state.groups.forEach(g=>{
+      (state.channels[g.id]||[]).forEach(c=>{total+=getUnreadCount(c.id)});
+    });
+  }
+  return total;
 }
 function incrementUnread(channelId) {
   if(state.activeChannel===channelId)return;
@@ -671,8 +689,8 @@ function renderMain(){
           </div>
         </div>
         <div class="sidebar-tabs">
-          <div class="sidebar-tab ${state.sidebarTab==='groups'?'active':''}" onclick="switchTab('groups')">Saloons</div>
-          <div class="sidebar-tab ${state.sidebarTab==='dms'?'active':''}" onclick="switchTab('dms')">DMs</div>
+          <div class="sidebar-tab ${state.sidebarTab==='groups'?'active':''}" onclick="switchTab('groups')">Saloons ${getTotalUnread('groups')>0?`<span class="tab-badge">${getTotalUnread('groups')}</span>`:''}</div>
+          <div class="sidebar-tab ${state.sidebarTab==='dms'?'active':''}" onclick="switchTab('dms')">DMs ${getTotalUnread('dms')>0?`<span class="tab-badge">${getTotalUnread('dms')}</span>`:''}</div>
         </div>
         ${state.sidebarTab==='groups'?renderGroupsTab():renderDMsTab()}
         ${state.sidebarTab==='groups'?(state.groups.length>0?'<div class="sidebar-footer"><button class="create-btn" onclick="showCreateGroupModal()">+ New Saloon</button></div>':''):(JSON.parse(localStorage.getItem('saloon-dms')||'[]').length>0?'<div class="sidebar-footer"><button class="create-btn" onclick="showNewDMModal()">+ New DM</button></div>':'')}
@@ -1086,7 +1104,9 @@ async function selectChannel(groupId,channelId){
   state.atBottom=true;
   const ch=(state.channels[groupId]||[]).find(c=>c.id===channelId);
   state.activeChannelName=ch?.name||'general';state.activeChannelDesc=ch?.about||'';
+  state.loadingMessages=true;state.messages=[];render();
   state.messages=await fetchMessages(channelId);
+  state.loadingMessages=false;
   await fetchMessageProfiles();
   await fetchReactions(channelId);
   markRead(channelId);
