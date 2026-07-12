@@ -337,6 +337,14 @@ body{
 .mobile-menu-btn:hover{border-color:var(--accent);color:var(--accent)}
 .mobile-menu-btn:active{transform:scale(.95)}
 .sidebar-backdrop{display:none}
+
+.drawer-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);z-index:250}
+.drawer{position:fixed;top:0;left:0;bottom:0;width:280px;background:var(--bg);z-index:251;display:flex;flex-direction:column;box-shadow:var(--shadow-lg);padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
+.drawer-header{padding:20px 20px 16px;border-bottom:1px solid var(--border)}
+.drawer-list{flex:1;overflow-y:auto;padding:8px 0}
+.drawer-item{display:flex;align-items:center;gap:12px;padding:12px 20px;cursor:pointer;color:var(--text-secondary);transition:background .15s ease,color .15s ease;font-size:.92em}
+.drawer-item:hover{background:var(--bg-hover);color:var(--text)}
+.drawer-item:active{background:var(--bg-elevated)}
 @media(max-width:768px){
   .sidebar{display:none}
   .sidebar.mobile-open{display:flex;position:fixed;top:0;left:0;bottom:0;z-index:200;height:100%;width:280px;box-shadow:var(--shadow-lg);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
@@ -606,7 +614,7 @@ function nsecDecode(nsec) { return nip19.decode(nsec); }
 let state = {
   user: null, groups: [], activeGroup: null, activeChannel: null,
   channels: {}, messages: [], view: 'onboard', sidebarTab: 'groups',
-  sidebarOpen: false, channelSidebarOpen: false, showProfile: false, viewingProfile: null, dms: [], activeDM: null,
+  sidebarOpen: false, channelSidebarOpen: false, drawerOpen: false, showProfile: false, viewingProfile: null, dms: [], activeDM: null,
   profiles: {},
   theme: localStorage.getItem('saloon-theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'),
   searchQuery: '', dmSearchQuery: '', lastMessages: {}, loadingMessages: false,
@@ -1414,6 +1422,7 @@ function doRender(){
   if(state.view==='profile'){app.innerHTML=renderProfilePage();return}
   if(state.view==='saloonSettings'){app.innerHTML=renderSaloonSettingsPage();return}
   let html=renderMain();
+  html+=renderDrawer();
   if(state.viewingProfile)html+=renderViewProfileModal();
   if(state.showCreateGroupModal)html+=renderCreateGroupModal();
   if(state.showCreateChannelModal)html+=renderCreateChannelModal();
@@ -1423,6 +1432,38 @@ function doRender(){
   setupScrollListener();
   if(state.activeChannel||state.activeDM)scrollMessages();
   updateTabTitle();
+}
+
+function renderDrawer(){
+  if(!state.drawerOpen)return'';
+  const avatarBgStr=avatarBg(state.user.pk);
+  const items=[
+    {view:'profile',label:'Profile',icon:'<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>'},
+    {view:'settings',label:'Settings',icon:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"'},
+    {view:'relays',label:'Relays',icon:'<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>'},
+  ];
+  return `<div class="drawer-backdrop" onclick="closeDrawer()"></div>
+  <div class="drawer">
+    <div class="drawer-header">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="width:40px;height:40px;border-radius:50%;background:${avatarBgStr};display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;overflow:hidden">${state.user.picture?`<img src="${escapeHtml(state.user.picture)}" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'">`:(state.user.name||'?')[0].toUpperCase()}</div>
+        <div>
+          <div style="font-weight:700">${escapeHtml(state.user.name||'Anon')}</div>
+          <div style="font-size:.75em;color:var(--text-tertiary);font-family:monospace">${state.user.npub?.slice(0,16)||''}…</div>
+        </div>
+      </div>
+    </div>
+    <div class="drawer-list">
+      ${items.map(item=>`<div class="drawer-item" onclick="drawerNavigate('${item.view}')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${item.icon}</svg>
+        <span>${item.label}</span>
+      </div>`).join('')}
+      <div class="drawer-item" onclick="logout()" style="color:var(--danger)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        <span>Logout</span>
+      </div>
+    </div>
+  </div>`;
 }
 
 function renderMain(){
@@ -1435,7 +1476,7 @@ function renderMain(){
           <button class="theme-toggle" onclick="toggleTheme()" title="${state.theme==='dark'?'Light mode':'Dark mode'}" aria-label="Toggle theme">${state.theme==='dark'?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>'}</button>
         </div>
         <div class="profile-section">
-          <div class="profile-row" onclick="openSettingsPage()">
+          <div class="profile-row" onclick="if(window.innerWidth<768){openDrawer()}else{openSettingsPage()}">
             <span class="avatar" style="background:${avatarBg(state.user.pk)};color:#fff">${(state.user.name||'?')[0].toUpperCase()}</span>
             <span class="pname" style="flex:1;min-width:0">${escapeHtml(state.user.name||'Anon')}</span>
             <button class="logout-icon" onclick="event.stopPropagation();logout()" title="Logout" aria-label="Logout">
@@ -2213,6 +2254,13 @@ function mobileMenuClick(){
     toggleSidebar();
   }
 }
+function openDrawer(){state.drawerOpen=true;render()}
+function closeDrawer(){state.drawerOpen=false;render()}
+function drawerNavigate(view){
+  state.drawerOpen=false;
+  state.view=view;
+  render();
+}
 
 function switchTab(tab){state.sidebarTab=tab;render()}
 
@@ -2850,7 +2898,7 @@ window.showCreateGroup=showCreateGroup;window.showCreateChannel=showCreateChanne
 window.showNewDM=showNewDM;window.createAccount=createAccount;window.loginExisting=loginExisting;
 window.finishKeyBackup=finishKeyBackup;window.showKeys=showKeys;window.copyNsec=copyNsec;
 window.toggleSidebar=toggleSidebar;window.toggleChannelSidebar=toggleChannelSidebar;window.closeAllSidebars=closeAllSidebars;window.backToSaloons=backToSaloons;window.mobileMenuClick=mobileMenuClick;window.switchTab=switchTab;window.saveProfile=saveProfile;
-window.openProfile=openProfile;window.closeProfile=closeProfile;window.saveProfileFromPage=saveProfileFromPage;
+window.openProfile=openProfile;window.closeProfile=closeProfile;window.saveProfileFromPage=saveProfileFromPage;window.openDrawer=openDrawer;window.closeDrawer=closeDrawer;window.drawerNavigate=drawerNavigate;
 window.viewProfile=viewProfile;window.closeViewProfile=closeViewProfile;window.startDM=startDM;
 window.logout=logout;window.onSearchInput=onSearchInput;window.onDMSearchInput=onDMSearchInput;
 window.onMsgInput=onMsgInput;window.onMsgKeydown=onMsgKeydown;window.onDMMsgKeydown=onDMMsgKeydown;window.autoResize=autoResize;window.insertMention=insertMention;
