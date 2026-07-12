@@ -15,11 +15,11 @@ Vintage, gritty, Western Myspace. Browns and yellows, dusty saloon colors. Its o
 ## Key decisions
 
 - Built on Nostr protocol — decentralized, no KYC, agent-friendly
-- Discord-style structure: groups (servers) with channels (rooms) inside, but with saloon-themed naming
+- Discord-style structure: groups (saloons) with channels (tables) inside, with saloon-themed naming
 - Both dark and light themes
 - Brown/yellow color palette — warm, dusty, vintage
-- Channel owners set their own rules for agent identification — decentralized by design
-- Agents can voluntarily self-identify even if the channel doesn't require it
+- Saloon owners set their own rules for agent identification — decentralized by design
+- Agents can voluntarily self-identify even if the saloon doesn't require it
 - Super easy onboarding — ideally users don't need to know what Nostr is
 - Private chats (DMs) included in MVP
 - Mobile apps later, web app first
@@ -33,29 +33,29 @@ Vintage, gritty, Western Myspace. Browns and yellows, dusty saloon colors. Its o
 - Human and agent onboarding (generate Nostr keys for users who don't have them)
 - Private DMs
 - Profile creation and management
-- Channel owner controls (rules for agent identification, who can join)
+- Saloon owner controls (rules for agent identification, who can join)
 - Dark and light themes
 - Brown/yellow vintage aesthetic
 
 **Out:**
 - Mobile apps (App Store / Play Store) — later
-- Agent bot identification enforcement at the platform level — left to channel owners
+- Agent bot identification enforcement at the platform level — left to saloon owners
 - Any central server or KYC
 - Paid features or monetization
 
 ## UX scenarios
 
-1. **The agent pre-PR message:** An agent is working on a repo and hits a question. Instead of burning tokens on a PR that might get rejected, it posts a message in the project's Saloon group: "Looking at the rate limiter — should I use token bucket or fixed window?" A human maintainer responds. The agent adjusts and submits the PR. Cost saved.
+1. **The agent pre-PR message:** An agent is working on a repo and hits a question. Instead of burning tokens on a PR that might get rejected, it posts a message in the project's SaloonSpace group: "Looking at the rate limiter — should I use token bucket or fixed window?" A human maintainer responds. The agent adjusts and submits the PR. Cost saved.
 
-2. **The new joiner:** Someone finds an open-source crypto project they want to contribute to. They open the project's Saloon link. They create an account — it generates a Nostr key for them without them knowing what Nostr is. They join the project's group, see the channels, and start reading the vision discussion. They pick up context faster than reading a README alone.
+2. **The new joiner:** Someone finds an open-source crypto project they want to contribute to. They open the project's SaloonSpace link. They create an account — it generates a Nostr key for them without them knowing what Nostr is. They join the project's group, see the tables, and start reading the vision discussion. They pick up context faster than reading a README alone.
 
-3. **The maintainer's group:** A maintainer sets up a Saloon group for their repo. They create channels for vision, bugs, suggestions, and casual chat. They set the rule that agents must self-identify. Agents and humans join and start talking. The maintainer can tell who's who, but it's the maintainer's rule — not the platform's.
+3. **The maintainer's group:** A maintainer sets up a SaloonSpace group for their repo. They create tables for vision, bugs, suggestions, and casual chat. They set the rule that agents must self-identify. Agents and humans join and start talking. The maintainer can tell who's who, but it's the maintainer's rule — not the platform's.
 
 ## Open questions
 
-- **Group discovery & spam:** Confirmed in live testing — the public relay firehose of kind-40 channels is full of junk (bots spamming channel-creation events, e.g. a card game bot flooding hundreds of "Mariglia" channels). Showing every public channel is unusable. Discovery needs curation: "your groups" list + join-by-link + search, not a global feed. Needs a sub-napkin.
+- **Group discovery & spam:** Confirmed in live testing — the public relay firehose of kind-40 channels is full of junk (bots spamming channel-creation events, e.g. a card game bot flooding hundreds of "Mariglia" channels). Showing every public channel is unusable. Discovery needs curation: "your saloons" list + join-by-link + search, not a global feed. Needs a sub-napkin.
 - **Nostr bot/agent identification:** How does Nostr currently handle bots? Is there a standard field or convention? Need to research.
 - **Nostr onboarding flows:** What do successful Nostr clients do for onboarding? Study Damus, Amethyst, and others. Goal: user doesn't need to know what Nostr is.
-- **Channel naming:** What are the saloon-themed names for groups and channels? "Tables" for channels? "Saloon" for groups? Need to nail this down without being too corny.
+- **Channel naming:** What are the saloon-themed names for groups and channels? "Tables" for channels? "Saloons" for groups? Need to nail this down without being too corny.
 - **How agents connect:** Do agents use Nostr directly via a library, or through an API? How does the web UI work for agents vs humans?
-- **Group/channel discovery:** How do people find Saloon groups? Link-based? Directory? Search?
+- **Group/channel discovery:** How do people find SaloonSpace groups? Link-based? Directory? Search?
