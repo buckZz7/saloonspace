@@ -26,7 +26,7 @@
   --sidebar-w: 200px;
 }
 [data-theme="light"] {
-  --bg: #f5f0e8; --bg-card: #fffdf8; --bg-elevated: #ffffff; --bg-hover: #e0d5c0;
+  --bg: #ede4d4; --bg-card: #f7f1e8; --bg-elevated: #ffffff; --bg-hover: #e0d5c0;
   --bg-main: #ffffff;
   --text: #2a1f17; --text-secondary: #5a4535; --text-tertiary: #8a7355;
   --border: #c4a87a; --border-light: #d4ba8a;
@@ -40,6 +40,7 @@
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 *::placeholder{color:var(--text-secondary);opacity:.5}
 input,textarea,button{font-family:inherit}
+button{border:none;background:none;color:inherit}
 html{scroll-behavior:smooth;scroll-height:100%}
 body{
   font-family:'Inter',system-ui,sans-serif;
@@ -136,7 +137,7 @@ body{
 [data-theme="light"] .group-item:hover{background:rgba(0,0,0,.04)}
 .group-item:active{transform:scale(.98)}
 .group-item.active{background:rgba(255,255,255,.06);border-left:3px solid var(--accent);padding-left:9px;box-shadow:inset 0 1px 0 rgba(255,255,255,.03)}
-.group-item .gicon{width:28px;height:28px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.7em;font-weight:700;color:#fff}
+.group-item .gicon{width:24px;height:24px;border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.6em;font-weight:700;color:#fff}
 .group-item .gname{font-size:.9em;font-weight:500;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .group-item .expand{font-size:.7em;color:var(--text-tertiary);transition:transform .2s ease}
 .group-item.active .expand{transform:rotate(0)}
@@ -985,7 +986,7 @@ function renderMain(){
       <div class="sidebar-backdrop ${(state.sidebarOpen||state.channelSidebarOpen)?'mobile-open':''}" onclick="closeAllSidebars()"></div>
       <div class="sidebar ${state.sidebarOpen?'mobile-open':''}">
         <div class="sidebar-header">
-          <h1>SaloonSpace <span class="relay-dot ${relayStatus}" title="${relayStatus==='connected'?'Connected to Nostr relays':relayStatus==='connecting'?'Connecting…':'Disconnected'}"></span></h1>
+          <h1>SaloonSpace</h1>
           <button class="theme-toggle" onclick="toggleTheme()" title="${state.theme==='dark'?'Light mode':'Dark mode'}" aria-label="Toggle theme">${state.theme==='dark'?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>'}</button>
         </div>
         <div class="profile-section">
@@ -1153,7 +1154,7 @@ function renderChatArea(){
   return `
     <div style="display:flex;flex-direction:column;height:100%">
       <div class="chat-header"><div style="display:flex;align-items:center"><button class="mobile-menu-btn" onclick="mobileMenuClick()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button><div class="channel-name">Howdy, partner 🤠</div></div></div>
-      <div style="display:flex;align-items:center;justify-content:center;flex:1;color:var(--text-tertiary);padding:24px">
+      <div style="display:flex;align-items:center;justify-content:center;flex:1;color:var(--text-tertiary);padding:60px 24px max(24px,env(safe-area-inset-bottom))">
         <div style="text-align:center;max-width:320px">
           <div style="margin-bottom:10px"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
           ${state.groups.length===0
