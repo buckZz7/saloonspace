@@ -17,6 +17,7 @@
   --text: #f0e0c8; --text-secondary: #d4b890; --text-tertiary: #a08868;
   --border: #3a2a1c; --border-light: #4a3525;
   --accent: #d4a017; --accent-bright: #f0c040; --accent-dim: #b8901a;
+  --on-accent: #000;
   --danger: #c0392b; --green: #27ae60;
   --shadow-sm: 0 1px 3px rgba(0,0,0,.3);
   --shadow-md: 0 4px 16px rgba(0,0,0,.4);
@@ -26,16 +27,17 @@
   --sidebar-w: 200px;
 }
 [data-theme="light"] {
-  --bg: #d4c4a8; --bg-card: #e8dcc4; --bg-elevated: #f0e8d8; --bg-hover: #c4b498;
-  --bg-main: #f5f0e8;
-  --text: #2a1f17; --text-secondary: #5a4535; --text-tertiary: #8a7355;
+  --bg: #c9b896; --bg-card: #e8dcc4; --bg-elevated: #f2ebe0; --bg-hover: #d4c4a8;
+  --bg-main: #faf5ed;
+  --text: #3a2817; --text-secondary: #6a5038; --text-tertiary: #8a7355;
   --border: #b8a888; --border-light: #c4b498;
-  --accent: #b8901a; --accent-bright: #d4a017; --accent-dim: #9a7815;
+  --accent: #6a4523; --accent-bright: #8a5a2d; --accent-dim: #5a3a1a;
+  --on-accent: #f0d060;
   --danger: #a93226; --green: #1e8449;
-  --shadow-sm: 0 1px 3px rgba(90,69,53,.12);
-  --shadow-md: 0 4px 16px rgba(90,69,53,.10);
-  --shadow-lg: 0 12px 40px rgba(90,69,53,.15);
-  --glow-accent: 0 0 12px rgba(184,144,26,.20);
+  --shadow-sm: 0 1px 3px rgba(90,69,53,.15);
+  --shadow-md: 0 4px 16px rgba(90,69,53,.12);
+  --shadow-lg: 0 12px 40px rgba(90,69,53,.18);
+  --glow-accent: 0 0 12px rgba(106,69,35,.15);
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 *::placeholder{color:var(--text-secondary);opacity:.6}
@@ -198,8 +200,8 @@ body{
 .msg-input{padding:12px 16px max(12px,env(safe-area-inset-bottom));display:flex;gap:8px;position:sticky;bottom:0;background:color-mix(in srgb,var(--bg-card) 92%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 -1px 0 rgba(0,0,0,.1)}
 [data-theme="light"] .msg-input{background:color-mix(in srgb,var(--bg-card) 92%,transparent);box-shadow:0 -1px 0 rgba(0,0,0,.05)}
 .msg-input input,.msg-input textarea{flex:1;background:var(--bg-hover);border:1px solid transparent;color:var(--text);padding:12px 16px;border-radius:20px;font-size:.95em;font-family:inherit;transition:border-color .2s ease,box-shadow .2s ease;resize:none;overflow-y:auto;max-height:calc(1.5em*5+24px);min-height:46px;line-height:1.5}
-.msg-input input:focus,.msg-input textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(212,160,23,.12)}
-.msg-input button{background:var(--accent);color:#000;border:none;padding:14px;border-radius:var(--radius-md);font-weight:600;cursor:pointer;font-size:.95em;transition:all .15s ease;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.msg-input input:focus,.msg-input textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(106,69,35,.15)}
+.msg-input button{background:var(--accent);color:var(--on-accent);border:none;padding:14px;border-radius:var(--radius-md);font-weight:600;cursor:pointer;font-size:.95em;transition:all .15s ease;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .msg-input button:hover{background:var(--accent-bright)}
 .msg-input button:active{transform:scale(.95)}
 
@@ -209,9 +211,9 @@ body{
 .onboard .field{margin-bottom:16px;text-align:left}
 .onboard label{display:block;font-size:.85em;color:var(--text-secondary);margin-bottom:4px}
 .onboard input{width:100%;background:var(--bg-elevated);border:1px solid var(--border);color:var(--text);padding:12px 16px;border-radius:var(--radius-md);font-size:.95em;font-family:inherit;transition:border-color .2s ease,box-shadow .2s ease}
-.onboard input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(212,160,23,.12)}
+.onboard input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(106,69,35,.15)}
 [data-theme="light"] .onboard input{box-shadow:0 1px 3px rgba(0,0,0,.08)}
-.onboard button{background:var(--accent);color:#000;border:none;padding:12px 32px;border-radius:var(--radius-md);font-weight:600;cursor:pointer;font-size:1em;margin-top:0;transition:all .15s ease;box-shadow:0 2px 8px rgba(212,160,23,.25)}
+.onboard button{background:var(--accent);color:var(--on-accent);border:none;padding:12px 32px;border-radius:var(--radius-md);font-weight:600;cursor:pointer;font-size:1em;margin-top:0;transition:all .15s ease;box-shadow:0 2px 8px rgba(0,0,0,.15)}
 .onboard button:hover{background:var(--accent-bright);filter:brightness(1.08)}
 .onboard button:active{transform:scale(.98)}
 .onboard .or{color:var(--text-tertiary);font-size:.85em;margin:16px 0}
@@ -227,10 +229,10 @@ body{
 .onboard .key-display.secret .label{color:var(--danger);font-weight:600}
 .onboard .warning{color:var(--danger);font-size:.82em;margin-top:8px}
 .onboard .key-warning{color:var(--danger);font-size:.82em;margin-top:8px;font-weight:500;display:flex;align-items:center;gap:6px}
-.onboard .copy-btn{display:inline-flex;align-items:center;gap:6px;padding:12px 24px;margin-top:8px;background:var(--accent);color:#000;border:none;border-radius:var(--radius-md);font-weight:600;cursor:pointer;font-size:1em;transition:all .15s ease}
+.onboard .copy-btn{display:inline-flex;align-items:center;gap:6px;padding:12px 24px;margin-top:8px;background:var(--accent);color:var(--on-accent);border:none;border-radius:var(--radius-md);font-weight:600;cursor:pointer;font-size:1em;transition:all .15s ease}
 .onboard .copy-btn:hover{background:var(--accent-bright)}
 .onboard .copy-btn:active{transform:scale(.97)}
-.onboard .solid-btn{background:var(--accent);color:#000;border:none;padding:14px 32px;border-radius:var(--radius-md);font-weight:700;cursor:pointer;font-size:1.05em;margin-top:0;width:100%;transition:all .15s ease}
+.onboard .solid-btn{background:var(--accent);color:var(--on-accent);border:none;padding:14px 32px;border-radius:var(--radius-md);font-weight:700;cursor:pointer;font-size:1.05em;margin-top:0;width:100%;transition:all .15s ease}
 .onboard .solid-btn:hover{background:var(--accent-bright)}
 .onboard .solid-btn:active{transform:scale(.97)}
 
@@ -242,11 +244,11 @@ body{
 .profile-modal .field{margin-bottom:12px;text-align:left}
 .profile-modal label{display:block;font-size:.85em;color:var(--text-secondary);margin-bottom:4px}
 .profile-modal input,.profile-modal textarea{width:100%;background:var(--bg-elevated);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:var(--radius-sm);font-family:inherit;font-size:.9em;transition:border-color .2s ease,box-shadow .2s ease}
-.profile-modal input:focus,.profile-modal textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(212,160,23,.12)}
+.profile-modal input:focus,.profile-modal textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(106,69,35,.15)}
 .profile-modal textarea{resize:vertical;min-height:60px}
 .profile-modal .btns{display:flex;gap:8px;margin-top:16px}
 .profile-modal .btns button{flex:1;padding:10px;border-radius:var(--radius-sm);cursor:pointer;font-family:inherit;font-size:.9em;transition:all .2s ease}
-.profile-modal .save{background:var(--accent);color:#000;border:none;font-weight:600;box-shadow:var(--shadow-sm)}
+.profile-modal .save{background:var(--accent);color:var(--on-accent);border:none;font-weight:600;box-shadow:var(--shadow-sm)}
 .profile-modal .save:hover{background:var(--accent-bright)}
 .profile-modal .save:active{transform:scale(.97)}
 .profile-modal .cancel{background:transparent;color:var(--text-secondary);border:1px solid var(--border)}
@@ -255,7 +257,7 @@ body{
 .search-box{padding:6px 8px;margin-bottom:4px;position:relative}
 .search-box .search-icon{position:absolute;left:16px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:var(--text-tertiary);pointer-events:none}
 .search-box input{width:100%;background:var(--bg-hover);border:1px solid transparent;color:var(--text);padding:5px 10px 5px 32px;border-radius:20px;font-size:.8em;font-family:inherit;transition:border-color .2s ease}
-.search-box input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(212,160,23,.12)}
+.search-box input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(106,69,35,.15)}
 
 .msg{margin-bottom:14px;display:flex;gap:10px;align-items:flex-start}
 .msg.grouped{margin-bottom:4px;margin-top:-4px}
@@ -297,17 +299,17 @@ body{
 .mention-popup .item .avatar-sm{width:24px;height:24px;border-radius:50%;background:var(--bg-card);display:flex;align-items:center;justify-content:center;font-size:.7em;font-weight:600}
 
 .modal-form .field input,.modal-form .field textarea{width:100%;background:var(--bg-elevated);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:var(--radius-sm);font-family:inherit;font-size:.9em;transition:border-color .2s ease,box-shadow .2s ease}
-.modal-form .field input:focus,.modal-form .field textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(212,160,23,.12)}
+.modal-form .field input:focus,.modal-form .field textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(106,69,35,.15)}
 .modal-form .field textarea{resize:vertical;min-height:60px}
 .modal-form .field label{display:block;font-size:.85em;color:var(--text-secondary);margin-bottom:4px}
 .modal-form .field{margin-bottom:14px;text-align:left}
 .modal-form .options{display:flex;margin-bottom:16px;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden}
 .modal-form .options button{flex:1;padding:10px;cursor:pointer;font-family:inherit;font-size:.88em;border:none;background:transparent;color:var(--text);opacity:.5;transition:all .15s ease}
 .modal-form .options button:hover{background:var(--bg-hover)}
-.modal-form .options button.active{background:var(--accent);color:#000;font-weight:600;opacity:1}
+.modal-form .options button.active{background:var(--accent);color:var(--on-accent);font-weight:600;opacity:1}
 .modal-form .btns{display:flex;gap:8px;margin-top:20px}
 .modal-form .btns button{flex:1;padding:10px;border-radius:var(--radius-sm);cursor:pointer;font-family:inherit;font-size:.9em;transition:all .2s ease}
-.modal-form .save{background:var(--accent);color:#000;border:none;font-weight:600;box-shadow:var(--shadow-sm)}
+.modal-form .save{background:var(--accent);color:var(--on-accent);border:none;font-weight:600;box-shadow:var(--shadow-sm)}
 .modal-form .save:hover{background:var(--accent-bright)}
 .modal-form .save:active{transform:scale(.97)}
 .modal-form .cancel{background:transparent;color:var(--text-secondary);border:1px solid var(--border)}
@@ -381,7 +383,7 @@ body{
 /* Channel search in chat area */
 .channel-search-bar{padding:6px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;background:var(--bg-card)}
 .channel-search-bar input{flex:1;background:var(--bg-elevated);border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:var(--radius-sm);font-size:.88em;font-family:inherit;transition:border-color .2s ease}
-.channel-search-bar input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(212,160,23,.12)}
+.channel-search-bar input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(106,69,35,.15)}
 .channel-search-bar .clear-search{background:none;border:none;color:var(--text-tertiary);cursor:pointer;font-size:1em;padding:4px;transition:color .15s ease}
 .channel-search-bar .clear-search:hover{color:var(--danger)}
 .search-highlight{background:rgba(240,192,64,.3);border-radius:var(--radius-sm);padding:1px 2px}
@@ -415,7 +417,7 @@ body{
 .settings-page .field{margin-bottom:14px}
 .settings-page label{display:block;font-size:.85em;color:var(--text-secondary);margin-bottom:4px}
 .settings-page input,.settings-page textarea,.settings-page select{width:100%;background:var(--bg-elevated);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:var(--radius-sm);font-family:inherit;font-size:.92em;transition:border-color .2s ease,box-shadow .2s ease}
-.settings-page input:focus,.settings-page textarea:focus,.settings-page select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(212,160,23,.12)}
+.settings-page input:focus,.settings-page textarea:focus,.settings-page select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(106,69,35,.15)}
 .settings-page textarea{resize:vertical;min-height:60px}
 .settings-page .toggle-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0}
 .settings-page .toggle-row label{margin-bottom:0}
@@ -433,7 +435,7 @@ body{
 .settings-page .key-section .key-val{font-family:monospace;font-size:.8em;word-break:break-all;color:var(--text-secondary)}
 .settings-page .btn-row{display:flex;gap:8px;margin-top:16px}
 .settings-page .btn-row button{flex:1;padding:12px;border-radius:var(--radius-sm);cursor:pointer;font-family:inherit;font-size:.92em;transition:all .15s ease}
-.settings-page .btn-save{background:var(--accent);color:#000;border:none;font-weight:600;box-shadow:var(--shadow-sm)}
+.settings-page .btn-save{background:var(--accent);color:var(--on-accent);border:none;font-weight:600;box-shadow:var(--shadow-sm)}
 .settings-page .btn-save:hover{background:var(--accent-bright)}
 .settings-page .btn-save:active{transform:scale(.97)}
 .settings-page .btn-logout{background:transparent;color:var(--danger);border:1px solid var(--danger)}
@@ -467,7 +469,7 @@ body{
 .relay-add-btn:hover{color:var(--accent);background:var(--bg-hover)}
 .relay-add-input-row{display:flex;gap:8px;margin-top:12px}
 .relay-add-input{flex:1;background:var(--bg-elevated);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:var(--radius-sm);font-family:monospace;font-size:.88em}
-.relay-add-input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(212,160,23,.12)}
+.relay-add-input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(106,69,35,.15)}
 
 @media(max-width:768px){
   .members-panel{width:100%}
@@ -475,7 +477,7 @@ body{
 }
 
 /* Solid create button (empty state CTA) */
-.create-btn.solid{background:var(--accent);color:#000;font-weight:600}
+.create-btn.solid{background:var(--accent);color:var(--on-accent);font-weight:600}
 .create-btn.solid:hover{background:var(--accent-bright);color:#000}
 
 /* Loading skeleton shimmer */
@@ -1987,7 +1989,7 @@ function renderProfilePage(){
         </div>
       </div>
       <div style="position:sticky;bottom:0;background:var(--bg-main);padding:12px 0;max-width:440px;margin:0 auto">
-        <button onclick="saveProfileFromPage()" style="width:100%;padding:14px;background:var(--accent);color:#000;border:none;border-radius:20px;font-weight:600;font-size:1em;cursor:pointer;font-family:inherit">Save Profile</button>
+        <button onclick="saveProfileFromPage()" style="width:100%;padding:14px;background:var(--accent);color:var(--on-accent);border:none;border-radius:20px;font-weight:600;font-size:1em;cursor:pointer;font-family:inherit">Save Profile</button>
       </div>
     </div>
   </div>`;
@@ -2033,7 +2035,7 @@ function renderSaloonSettingsPage(){
         <div style="margin-bottom:24px;padding:20px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg)">
           <div style="font-weight:600;font-size:1em;margin-bottom:12px">Share this saloon</div>
           <div style="font-size:.8em;color:var(--text-secondary);margin-bottom:12px;font-family:monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">saloonspace.app/#join=${escapeHtml(g.name.toLowerCase().replace(/[^a-z0-9]/g,''))}</div>
-          <button onclick="navigator.clipboard.writeText('https://buckzz7.github.io/saloonspace/#join=${g.id}');showToast('Invite link copied')" style="width:100%;padding:12px;background:var(--accent);color:#000;border:none;border-radius:var(--radius-md);font-weight:600;font-size:.95em;cursor:pointer;font-family:inherit;transition:all .15s ease;display:flex;align-items:center;justify-content:center;gap:8px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy invite link</button>
+          <button onclick="navigator.clipboard.writeText('https://buckzz7.github.io/saloonspace/#join=${g.id}');showToast('Invite link copied')" style="width:100%;padding:12px;background:var(--accent);color:var(--on-accent);border:none;border-radius:var(--radius-md);font-weight:600;font-size:.95em;cursor:pointer;font-family:inherit;transition:all .15s ease;display:flex;align-items:center;justify-content:center;gap:8px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy invite link</button>
           <div style="font-size:.75em;color:var(--text-tertiary);margin-top:10px;text-align:center">Anyone with this link can join your saloon</div>
         </div>
         <div class="field" style="margin-bottom:24px"><label>Tables (${channels.length})</label>
@@ -2049,7 +2051,7 @@ function renderSaloonSettingsPage(){
             </div>`).join('')||'<div style="color:var(--text-tertiary);font-size:.85em;padding:8px 0">No tables yet</div>'}
           </div>
         </div>
-        <button onclick="submitSettings('${g.id}');state.view='app';render()" style="width:100%;padding:14px;background:var(--accent);color:#000;border:none;border-radius:20px;font-weight:600;font-size:1em;cursor:pointer;font-family:inherit;margin-bottom:12px">Save</button>
+        <button onclick="submitSettings('${g.id}');state.view='app';render()" style="width:100%;padding:14px;background:var(--accent);color:var(--on-accent);border:none;border-radius:20px;font-weight:600;font-size:1em;cursor:pointer;font-family:inherit;margin-bottom:12px">Save</button>
         <button onclick="confirmLeaveSaloon('${g.id}','${g.pubkey===state.user.pk?'delete':'leave'}')" style="width:100%;padding:12px;color:var(--danger);background:none;border:1px solid var(--danger);border-radius:20px;cursor:pointer;font-size:.88em;font-family:inherit;transition:all .15s ease">${g.pubkey===state.user.pk?'Delete saloon':'Leave saloon'}</button>
       </div>
     </div>
