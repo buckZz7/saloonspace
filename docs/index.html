@@ -455,8 +455,119 @@ body{
 </head>
 <body>
 <div id="app"></div>
+<!-- nostr-bundle.js: nostr-tools v1.17.0 IIFE — exports SimplePool, finishEvent, generatePrivateKey, getPublicKey, nip19 -->
 <script src="nostr-bundle.js"></script>
+<!-- @noble/curves for secp256k1 ECDH (needed for NIP-44 v2 / NIP-17 gift-wrap).
+     The nostr-bundle has NIP-44 internally but does not export it, so we load
+     @noble/curves separately for the ECDH shared-secret computation. -->
+<script type="module">
+  import { secp256k1 } from "https://esm.sh/@noble/curves@1.6.0/secp256k1.js";
+  window.__nobleSecp256k1 = secp256k1;
+</script>
 <script>
+// NIP-44 v2 encryption implementation.
+// The nostr-bundle has NIP-44 internally but doesn't export it, so we implement
+// it here using @noble/curves (loaded above) for ECDH + Web Crypto for HKDF/AES-GCM.
+// This is required for NIP-17 (kind 14 + kind 13 seal + kind 1059 gift wrap) DMs.
+
+// Utility: concatenate Uint8Arrays
+function concatBytes(...arrays) {
+  const total = arrays.reduce((sum, a) => sum + a.length, 0);
+  const result = new Uint8Array(total);
+  let offset = 0;
+  for (const arr of arrays) { result.set(arr, offset); offset += arr.length; }
+  return result;
+}
+// Base64 encode/decode for Uint8Array
+function base64Encode(bytes) {
+  let binary = '';
+  for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+  return btoa(binary);
+}
+function base64Decode(str) {
+  const binary = atob(str);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return bytes;
+}
+
+const nip44 = {
+  // Compute 32-byte shared key from our private key (hex) and their public key (hex)
+  getConversationKey(privKey, pubKey) {
+    const shared = window.__nobleSecp256k1.getSharedSecret(privKey, '02' + pubKey);
+    return shared.subarray(1, 33); // 32 bytes
+  },
+
+  // HKDF-SHA256: derive 76 bytes of key material (encryption(32) || nonce(12) || auth(32))
+  async getMessageKeys(conversationKey, salt) {
+    const key = await crypto.subtle.importKey('raw', conversationKey, 'HKDF', false, ['deriveBits']);
+    const buf = await crypto.subtle.deriveBits(
+      { name: 'HKDF', hash: 'SHA-256', salt: salt, info: new TextEncoder().encode('nip44-v2') },
+      key, 76 * 8
+    );
+    const arr = new Uint8Array(buf);
+    return { encryption: arr.subarray(0, 32), nonce: arr.subarray(32, 44), auth: arr.subarray(44, 76) };
+  },
+
+  // Padding per NIP-44 v2 spec
+  calcPadding(len) {
+    if (len <= 32) return 32;
+    const nextPower = 1 << (Math.floor(Math.log2(len - 1)) + 1);
+    const chunkSize = nextPower <= 256 ? 32 : nextPower / 8;
+    return chunkSize * (Math.floor((len - 1) / chunkSize) + 1);
+  },
+
+  pad(plaintext) {
+    const encoded = new TextEncoder().encode(plaintext);
+    const unpaddedLen = encoded.length;
+    if (unpaddedLen < 1 || unpaddedLen >= 65408) throw new Error('invalid plaintext length');
+    const padLen = this.calcPadding(unpaddedLen);
+    const padding = crypto.getRandomValues(new Uint8Array(padLen - unpaddedLen));
+    const lenBytes = new Uint8Array(2);
+    new DataView(lenBytes.buffer).setUint16(0, unpaddedLen);
+    return concatBytes(lenBytes, encoded, padding);
+  },
+
+  unpad(padded) {
+    const len = new DataView(padded.buffer).getUint16(0);
+    const data = padded.subarray(2, 2 + len);
+    if (len === 0 || data.length !== len || padded.length !== 2 + this.calcPadding(len)) {
+      throw new Error('invalid padding');
+    }
+    return new TextDecoder().decode(data);
+  },
+
+  // Encrypt: returns base64 ciphertext (version 2 format)
+  async encrypt(privKey, pubKey, plaintext) {
+    const conversationKey = this.getConversationKey(privKey, pubKey);
+    const salt = crypto.getRandomValues(new Uint8Array(32));
+    const keys = await this.getMessageKeys(conversationKey, salt);
+    const padded = this.pad(plaintext);
+    const aesKey = await crypto.subtle.importKey('raw', keys.encryption, 'AES-GCM', false, ['encrypt']);
+    const encrypted = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv: keys.nonce }, aesKey, padded));
+    const hmacKey = await crypto.subtle.importKey('raw', keys.auth, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+    const mac = new Uint8Array(await crypto.subtle.sign('HMAC', hmacKey, encrypted));
+    return base64Encode(concatBytes(new Uint8Array([2]), salt, encrypted, mac));
+  },
+
+  // Decrypt: takes base64 ciphertext, returns plaintext
+  async decrypt(privKey, pubKey, ciphertextB64) {
+    const conversationKey = this.getConversationKey(privKey, pubKey);
+    const buf = base64Decode(ciphertextB64);
+    if (buf[0] !== 2) throw new Error('unknown encryption version ' + buf[0]);
+    const salt = buf.subarray(1, 33);
+    const ciphertext = buf.subarray(33, buf.length - 32);
+    const mac = buf.subarray(-32);
+    const keys = await this.getMessageKeys(conversationKey, salt);
+    const hmacKey = await crypto.subtle.importKey('raw', keys.auth, { name: 'HMAC', hash: 'SHA-256' }, false, ['verify']);
+    const valid = await crypto.subtle.verify('HMAC', hmacKey, mac, ciphertext);
+    if (!valid) throw new Error('invalid HMAC');
+    const aesKey = await crypto.subtle.importKey('raw', keys.encryption, 'AES-GCM', false, ['decrypt']);
+    const decrypted = new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: keys.nonce }, aesKey, ciphertext));
+    return this.unpad(decrypted);
+  }
+};
+
 // Bundle loaded synchronously via script tag — no module overhead.
 window.__NT = window.NostrTools || {};
 function startApp() {
@@ -474,7 +585,7 @@ let state = {
   searchQuery: '', dmSearchQuery: '', lastMessages: {}, loadingMessages: false,
   showCreateGroupModal: false, showCreateChannelModal: false, showNewDMModal: false,
   createGroupModalMode: 'create', showSettingsModal: false,
-  editingMessageId: null, reactions: {}, typingUsers: {},
+  editingMessageId: null, reactions: {}, typingUsers: {}, presence: {},
   mentionQuery: null, atBottom: true,
   replyingTo: null, replyingToContent: null, showMembersPanel: false,
   channelSearchQuery: '', showChannelSearch: false, showSettingsPage: false,
@@ -773,6 +884,45 @@ async function deleteMessage(messageId) {
   render();
 }
 
+// --- NIP-28 Moderation (kind 43 hide, kind 44 mute) ---
+async function hideMessage(messageId) {
+  await initPool();
+  const channelId = state.activeChannel;
+  const event = finishEvent({kind:43, content:'', tags:[['e',messageId],['e',channelId,'','context']], created_at:Math.floor(Date.now()/1000)}, state.user.sk);
+  try{await Promise.any(pool.publish(RELAYS,event))}catch(e){console.warn('publish',e)}
+  state.messages = state.messages.filter(m=>m.id!==messageId);
+  showToast('Message hidden');
+  render();
+}
+async function muteUserInSaloon(pubkey, groupId) {
+  await initPool();
+  const event = finishEvent({kind:44, content:'', tags:[['p',pubkey],['e',groupId,'','context']], created_at:Math.floor(Date.now()/1000)}, state.user.sk);
+  try{await Promise.any(pool.publish(RELAYS,event))}catch(e){console.warn('publish',e)}
+  // Remove their messages from local state
+  state.messages = state.messages.filter(m=>m.author!==pubkey);
+  showToast('User muted in this saloon');
+  render();
+}
+async function fetchHiddenMessages(channelId) {
+  await initPool();
+  const g = state.groups.find(x=>x.id===state.activeGroup);
+  if(!g) return [];
+  const owner = g.pubkey;
+  const events = await pool.list(RELAYS, [{kinds:[43], '#e':[channelId], authors:[owner], limit:100}]);
+  return events.map(e => e.tags.find(t=>t[0]==='e' && t[1]!==channelId)?.[1]).filter(Boolean);
+}
+async function fetchMutedUsers(groupId) {
+  await initPool();
+  const g = state.groups.find(x=>x.id===groupId);
+  if(!g) return [];
+  const owner = g.pubkey;
+  const events = await pool.list(RELAYS, [{kinds:[44], '#e':[groupId,'','context'], authors:[owner], limit:100}]);
+  // Also check our own mute events
+  const myEvents = await pool.list(RELAYS, [{kinds:[44], '#e':[groupId,'','context'], authors:[state.user.pk], limit:100}]);
+  const all = [...events, ...myEvents];
+  return all.map(e => e.tags.find(t=>t[0]==='p')?.[1]).filter(Boolean);
+}
+
 // --- Emoji reactions (kind 7) ---
 async function toggleReaction(messageId, emoji) {
   await initPool();
@@ -879,6 +1029,8 @@ function renderMarkdown(text) {
   s = s.replace(/\*([^*]+)\*/g, '<em>$1</em>');
   // Links [text](url)
   s = s.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+  // Images ![alt](url) — including data URIs
+  s = s.replace(/!\[([^\]]*)\]\((data:image\/[^\s)]+|https?:\/\/[^\s)]+)\)/g, '<img src="$2" alt="$1" style="max-width:100%;max-height:300px;border-radius:var(--radius-md);margin:4px 0;cursor:pointer" onclick="window.open(\'$2\',\'_blank\')">');
   // Bare URLs → link with favicon
   s = s.replace(/(?<!["'>])(https?:\/\/[^\s<]+)/g, (match, url) => {
     let domain;
@@ -967,20 +1119,232 @@ function scrollToBottom() {
   if(btn)btn.style.display = 'none';
 }
 
-// --- DMs (NIP-17 lite: kind 4 direct messages for MVP) ---
-async function sendDM(pubkey,text){
+// --- DMs (NIP-17: kind 14 chat message + kind 13 seal + kind 1059 gift wrap) ---
+// NIP-44 v2 encryption is used for seals and gift wraps (implemented above).
+// Backwards compatible: can still read old NIP-04 (kind 4) messages.
+
+// Wait for @noble/curves to load (ESM module is async)
+function waitForNoble(timeout=10000){
+  return new Promise((resolve,reject)=>{
+    if(window.__nobleSecp256k1)return resolve();
+    const start=Date.now();
+    const iv=setInterval(()=>{
+      if(window.__nobleSecp256k1){clearInterval(iv);resolve()}
+      else if(Date.now()-start>timeout){clearInterval(iv);reject(new Error('timeout waiting for @noble/curves'))}
+    },50);
+  });
+}
+
+// Create a signed kind 13 seal: encrypt a kind 14 chat message to a recipient
+async function createSeal(senderSk, recipientPk, chatMessageEvent){
+  const plaintext=JSON.stringify(chatMessageEvent);
+  const encrypted=await nip44.encrypt(senderSk, recipientPk, plaintext);
+  return finishEvent({
+    kind:13,
+    content:encrypted,
+    tags:[],
+    created_at:chatMessageEvent.created_at
+  }, senderSk);
+}
+
+// Create a kind 1059 gift wrap: encrypt a seal for a recipient using a random keypair
+async function createGiftWrap(sealEvent, recipientPk){
+  const tempSk=generatePrivateKey();
+  const tempPk=getPublicKey(tempSk);
+  const plaintext=JSON.stringify(sealEvent);
+  const encrypted=await nip44.encrypt(tempSk, recipientPk, plaintext);
+  return finishEvent({
+    kind:1059,
+    content:encrypted,
+    tags:[['p',recipientPk]],
+    created_at:Math.floor(Date.now()/1000)+Math.floor(Math.random()*86400) // jitter up to 24h
+  }, tempSk);
+}
+
+// Unwrap a kind 1059 gift wrap: decrypt the seal, then decrypt the chat message
+async function unwrapGiftWrap(giftWrapEvent, mySk, senderPk){
+  // Decrypt gift wrap to get the seal event
+  const sealJson=await nip44.decrypt(mySk, senderPk, giftWrapEvent.content);
+  const sealEvent=JSON.parse(sealJson);
+  // Seal is kind 13, signed by sender. Decrypt seal content to get chat message
+  const chatJson=await nip44.decrypt(mySk, senderPk, sealEvent.content);
+  const chatEvent=JSON.parse(chatJson);
+  return { chatMessage: chatEvent, sealEvent };
+}
+
+// sendDM: NIP-17 flow — create kind 14 → seal → gift wrap to recipient + sender
+async function sendDM(pubkey, text){
   await initPool();
-  // NIP-04 style for simplicity in MVP — will upgrade to NIP-17 later
-  const event=finishEvent({kind:4,content:text,tags:[['p',pubkey]],created_at:Math.floor(Date.now()/1000)},state.user.sk);
-  try{await Promise.any(pool.publish(RELAYS,event))}catch(e){console.warn('publish',e)}
-  if(!state.messages.some(m=>m.id===event.id))state.messages.push({id:event.id,content:text,author:state.user.pk,time:new Date(),isBot:false});
+  await waitForNoble();
+  const now=Math.floor(Date.now()/1000);
+  const myPk=state.user.pk;
+
+  // 1. Create unsigned kind 14 chat message
+  const chatMessage={
+    kind:14,
+    content:text,
+    tags:[['p',pubkey]],
+    created_at:now
+  };
+
+  // 2. Create seal (kind 13) — encrypt chat message to recipient with NIP-44
+  const sealToRecipient=await createSeal(state.user.sk, pubkey, chatMessage);
+
+  // 3. Gift wrap (kind 1059) for recipient
+  const giftWrapRecipient=await createGiftWrap(sealToRecipient, pubkey);
+
+  // 4. Also create seal + gift wrap for sender (so we can read our own messages)
+  const sealToSender=await createSeal(state.user.sk, myPk, chatMessage);
+  const giftWrapSender=await createGiftWrap(sealToSender, myPk);
+
+  // 5. Publish both gift wraps
+  try{
+    await Promise.any(pool.publish(RELAYS, giftWrapRecipient));
+    await Promise.any(pool.publish(RELAYS, giftWrapSender));
+  }catch(e){console.warn('publish DM',e)}
+
+  // 6. Add to local state immediately
+  if(!state.messages.some(m=>m.id===giftWrapRecipient.id)){
+    state.messages.push({id:giftWrapRecipient.id,content:text,author:myPk,time:new Date(now*1000),isBot:false});
+  }
   render();
 }
 
+// fetchDMs: fetch kind 1059 gift wraps addressed to us, unwrap them
 async function fetchDMs(pubkey){
   await initPool();
-  const events=await pool.list(RELAYS,[{kinds:[4],'#p':[pubkey],limit:50},{kinds:[4],authors:[pubkey],limit:50}]);
-  return events.sort((a,b)=>a.created_at-b.created_at).map(e=>({id:e.id,content:e.content,author:e.pubkey,time:new Date(e.created_at*1000),isBot:false}));
+  await waitForNoble();
+  const mySk=state.user.sk;
+  const myPk=state.user.pk;
+
+  // Fetch ALL gift wraps addressed to us (kind 1059 with our pubkey in 'p' tag)
+  // Then filter for conversations with the DM partner (pubkey parameter)
+  const giftWraps=await pool.list(RELAYS,[{kinds:[1059],'#p':[myPk],limit:100}]);
+
+  // Also fetch old NIP-04 (kind 4) messages for backwards compatibility
+  const oldDmEvents=await pool.list(RELAYS,[{kinds:[4],'#p':[pubkey],limit:50},{kinds:[4],authors:[pubkey],limit:50}]);
+
+  const messages=[];
+
+  // Process NIP-17 gift wraps
+  for(const gw of giftWraps){
+    try{
+      // The gift wrap is encrypted by a random keypair; the seal inside tells us who sent it
+      // We need to try decrypting — the seal's pubkey is the sender
+      // The gift wrap itself doesn't tell us the sender directly (privacy feature)
+      // We try to decrypt with each potential sender, or just with our key
+      // Actually: gift wrap content is encrypted to US, using a temp keypair.
+      // The seal inside is encrypted to US by the sender.
+      // The seal's pubkey field IS the sender's pubkey.
+
+      // First, decrypt the gift wrap (it was encrypted to our pubkey by a temp key)
+      // We don't know the temp pubkey, but we can try to extract the seal...
+      // Actually NIP-44 uses ECDH: we need the sender's pubkey to compute shared secret.
+      // For gift wraps, the "sender" is the temp key, and the temp pubkey is NOT in the event.
+      // But the gift wrap was encrypted TO us. We need to decrypt it.
+      //
+      // The gift wrap's pubkey field is the temp public key (used to sign the event).
+      // So we use gw.pubkey as the "sender" for ECDH to decrypt the gift wrap content.
+      const sealJson=await nip44.decrypt(mySk, gw.pubkey, gw.content);
+      const sealEvent=JSON.parse(sealJson);
+
+      // Verify seal is kind 13
+      if(sealEvent.kind!==13)continue;
+
+      // The seal's pubkey is the actual sender
+      const senderPk=sealEvent.pubkey;
+
+      // Decrypt the seal content to get the chat message
+      const chatJson=await nip44.decrypt(mySk, senderPk, sealEvent.content);
+      const chatEvent=JSON.parse(chatJson);
+
+      // Verify chat message is kind 14
+      if(chatEvent.kind!==14)continue;
+
+      // Check if this message is between us and the DM partner
+      const isToPartner=chatEvent.tags.some(t=>t[0]==='p'&&t[1]===pubkey);
+      const isToUs=chatEvent.tags.some(t=>t[0]==='p'&&t[1]===state.user.pk);
+      // Include if it's addressed to the partner (we sent) or to us (we received)
+      if(!isToPartner&&!isToUs){
+        // Could be a conversation that involves us — include if sender is our partner
+        if(senderPk!==pubkey&&senderPk!==state.user.pk)continue;
+      }
+
+      messages.push({
+        id:gw.id,
+        content:chatEvent.content,
+        author:senderPk===state.user.pk?state.user.pk:senderPk,
+        time:new Date(chatEvent.created_at*1000),
+        isBot:false,
+        _nip17:true
+      });
+    }catch(e){
+      // Decryption failed — might be a gift wrap from someone else, or corruption
+      console.debug('Failed to unwrap gift wrap:',e);
+      continue;
+    }
+  }
+
+  // Process old NIP-04 (kind 4) messages for backwards compatibility
+  for(const e of oldDmEvents){
+    // Old messages were stored as plaintext content (no actual encryption was done)
+    // Just read them directly
+    messages.push({
+      id:e.id,
+      content:e.content,
+      author:e.pubkey,
+      time:new Date(e.created_at*1000),
+      isBot:false,
+      _nip04:true
+    });
+  }
+
+  // Sort chronologically
+  return messages.sort((a,b)=>a.time-b.time);
+}
+
+// subscribeDMs: subscribe to kind 1059 gift wraps for real-time DM updates
+let dmSub=null;
+function subscribeDMs(pubkey){
+  if(dmSub){try{dmSub.unsub()}catch(e){}}
+  // Subscribe to gift wraps addressed to our pubkey
+  dmSub=pool.sub(RELAYS,[{kinds:[1059],'#p':[pubkey]}]);
+  dmSub.on('event',async(event)=>{
+    // Only process if we have an active DM conversation with someone
+    if(!state.activeDM)return;
+    try{
+      const mySk=state.user.sk;
+      // Decrypt gift wrap using event.pubkey as the temp sender
+      const sealJson=await nip44.decrypt(mySk, event.pubkey, event.content);
+      const sealEvent=JSON.parse(sealJson);
+      if(sealEvent.kind!==13)return;
+      const senderPk=sealEvent.pubkey;
+      const chatJson=await nip44.decrypt(mySk, senderPk, sealEvent.content);
+      const chatEvent=JSON.parse(chatJson);
+      if(chatEvent.kind!==14)return;
+
+      // Only show if this is from/to our active DM partner
+      const isFromPartner=senderPk===state.activeDM;
+      const isFromUs=senderPk===state.user.pk;
+      const isToPartner=chatEvent.tags.some(t=>t[0]==='p'&&t[1]===state.activeDM);
+      const isToUs=chatEvent.tags.some(t=>t[0]==='p'&&t[1]===state.user.pk);
+      if(!isFromPartner&&!isFromUs&&!isToPartner&&!isToUs)return;
+
+      // Deduplicate
+      if(state.messages.some(m=>m.id===event.id))return;
+      state.messages.push({
+        id:event.id,
+        content:chatEvent.content,
+        author:senderPk===state.user.pk?state.user.pk:senderPk,
+        time:new Date(chatEvent.created_at*1000),
+        isBot:false,
+        _nip17:true
+      });
+      render();
+    }catch(e){
+      console.debug('Failed to process incoming gift wrap:',e);
+    }
+  });
 }
 
 // --- Render ---
@@ -1166,6 +1530,8 @@ function renderChatArea(){
       ${state.mentionQuery?renderMentionPopup():''}
       ${state.replyingTo?`<div class="reply-preview-bar"><span>Replying to: <strong>${escapeHtml((state.replyingToContent||'').slice(0,40))}</strong></span><button class="cancel-reply" onclick="cancelReply()">✕</button></div>`:''}
       <div class="msg-input">
+        <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="handleFileUpload(this.files[0])">
+        <button onclick="document.getElementById('fileInput').click()" title="Upload image" aria-label="Upload image" style="background:var(--bg-hover);color:var(--text-secondary);border:none;padding:10px;border-radius:var(--radius-md);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></button>
         <textarea id="msgText" rows="1" placeholder="Message #${escapeHtml(state.activeChannelName||'general')}" oninput="onMsgInput(this.value);autoResize(this)" onkeydown="onMsgKeydown(event)">${state.editingMessageId?(state.messages.find(m=>m.id===state.editingMessageId)?.content||''):''}</textarea>
         <button onclick="sendMsg()" title="Send" aria-label="Send"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
       </div>`;
@@ -1222,7 +1588,8 @@ function renderMessages(){
     // Message grouping: same author within 5 min
     const prev=msgs[i-1];
     const grouped=prev&&prev.author===m.author&&(m.time-prev.time)<300000&&!m.edited;
-    const isOnline=(now-m.time.getTime())<120000; // active within 2 min
+    // Check presence: real NIP-38 status or fallback to recent message heuristic
+    const isOnline=state.presence?.[m.author] || (now-m.time.getTime())<120000;
     const avatar=pic?`<div class="avatar" style="position:relative"><img src="${escapeHtml(pic)}" onerror="this.style.display='none';this.parentElement.textContent='${escapeHtml(name[0]?.toUpperCase()||'?')}'">${isOnline&&!grouped?'<span class="presence-dot"></span>':''}</div>`:`<div class="avatar" style="background:${avatarBg(m.author)};color:#fff;border:none;position:relative">${escapeHtml(name[0]?.toUpperCase()||'?')}${isOnline&&!grouped?'<span class="presence-dot"></span>':''}</div>`;
     // Reactions
     const reacts=(state.reactions[m.id]||[]);
@@ -1233,7 +1600,7 @@ function renderMessages(){
       return `<span class="reaction-pill ${mine?'mine':''}" onclick="toggleReaction('${m.id}','${emoji}')">${emoji}<span class="count">${authors.length}</span></span>`;
     }).join('')}</div>`:'';
     // Action menu — Reply for all, Edit/Delete for own messages
-    const actionsHtml=`<div class="msg-actions"><button onclick="pinMessage('${m.id}')">Pin</button><button onclick="copyMessage('${m.id}')">Copy</button><button onclick="startReply('${m.id}')">Reply</button>${isOwn?`<button onclick="startEdit('${m.id}')">Edit</button><button onclick="deleteMessage('${m.id}')">Delete</button>`:''}</div>`;
+    const actionsHtml=`<div class="msg-actions"><button onclick="pinMessage('${m.id}')">Pin</button><button onclick="copyMessage('${m.id}')">Copy</button><button onclick="hideMessage('${m.id}')">Hide</button><button onclick="startReply('${m.id}')">Reply</button>${isOwn?`<button onclick="startEdit('${m.id}')">Edit</button><button onclick="deleteMessage('${m.id}')">Delete</button>`:''}</div>`;
     // Reaction bar (for all messages)
     const reactionBar=`<div class="reaction-bar"><button onclick="toggleReaction('${m.id}','👍')">👍</button><button onclick="toggleReaction('${m.id}','❤️')">❤️</button><button onclick="toggleReaction('${m.id}','😂')">😂</button><button onclick="toggleReaction('${m.id}','🤠')">🤠</button></div>`;
     // Reply quote — if this message is a reply, look up the original
@@ -1331,6 +1698,7 @@ function renderViewProfileModal(){
       <button class="cancel" onclick="closeViewProfile()">Close</button>
       ${p!==state.user.pk?'<button class="save" onclick="startDM(\''+p+'\')">Send DM</button>':''}
     </div>
+    ${p!==state.user.pk&&state.activeGroup?"<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)"><button onclick="muteUserInSaloon('"+p+"','"+state.activeGroup+"')" style="width:100%;padding:8px;color:var(--danger);background:none;border:1px solid var(--danger);border-radius:var(--radius-md);cursor:pointer;font-size:.85em;font-family:inherit">Mute in this saloon</button></div>":""}
   </div></div>`;
 }
 
@@ -1544,6 +1912,26 @@ function formatTime(date,prevDate){
 async function createAccount(){const key=await generateKey();const name=document.getElementById('displayName')?.value||'';state.user={...key,name};saveUser();state.view='keybackup';render();loadGroups()}
 function finishKeyBackup(){state.view='app';render()}
 function showKeys(){state.view='keybackup';render()}
+// --- NIP-94 File uploads (image sharing) ---
+async function handleFileUpload(file) {
+  if(!file) return;
+  if(file.size > 5*1024*1024) { showToast('Image too large (max 5MB)'); return; }
+  // Convert to base64 data URI for now (no external upload server)
+  // In production this would upload to a NIP-96/NIP-94 file storage relay
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    const dataUri = e.target.result;
+    // Send as message with image URL
+    const msg = `![image](${dataUri})`;
+    if(state.activeChannel) {
+      await sendMessage(state.activeChannel, msg);
+    }
+    // Reset file input
+    document.getElementById('fileInput').value = '';
+  };
+  reader.readAsDataURL(file);
+}
+
 function showToast(msg){
   let t=document.getElementById('toast');
   if(!t){t=document.createElement('div');t.id='toast';document.body.appendChild(t)}
@@ -1644,6 +2032,12 @@ async function selectChannel(groupId,channelId){
   state.messages=await fetchMessages(channelId);
   state.loadingMessages=false;
   await fetchMessageProfiles();
+  // Fetch real presence via NIP-38
+  const uniqueAuthors=[...new Set(state.messages.map(m=>m.author))];
+  if(uniqueAuthors.length>0){
+    state.presence=await fetchPresence(uniqueAuthors);
+    render();
+  }
   await fetchReactions(channelId);
   markRead(channelId);
   localStorage.removeItem('saloon-unread-'+channelId);
@@ -1657,6 +2051,8 @@ async function selectDM(pubkey){
   const dms=JSON.parse(localStorage.getItem('saloon-dms')||'[]');
   const dm=dms.find(d=>d.pubkey===pubkey);state.activeDMName=dm?.name||pubkey.slice(0,12);
   state.messages=await fetchDMs(pubkey);render();
+  // Subscribe to real-time NIP-17 gift wrap updates for our pubkey
+  subscribeDMs(state.user.pk);
 }
 
 async function sendDMMsg(){
@@ -1694,6 +2090,12 @@ async function submitCreateGroup(){
     // Fetch messages, profiles, reactions in background
     state.messages=await fetchMessages(chId);
     await fetchMessageProfiles();
+  // Fetch real presence via NIP-38
+  const uniqueAuthors=[...new Set(state.messages.map(m=>m.author))];
+  if(uniqueAuthors.length>0){
+    state.presence=await fetchPresence(uniqueAuthors);
+    render();
+  }
     await fetchReactions(chId);
     markRead(chId);
     localStorage.removeItem('saloon-unread-'+chId);
@@ -2070,6 +2472,32 @@ async function fetchMessageProfiles(){
 }
 
 // --- Init ---
+// --- NIP-38 User Status (kind 30315) ---
+async function broadcastPresence() {
+  if(!state.user?.sk) return;
+  await initPool();
+  const event = finishEvent({
+    kind: 30315,
+    content: JSON.stringify({status: 'online'}),
+    tags: [['d', 'general']],
+    created_at: Math.floor(Date.now()/1000)
+  }, state.user.sk);
+  try { await Promise.any(pool.publish(RELAYS, event)); } catch(e){}
+}
+async function fetchPresence(pubkeys) {
+  await initPool();
+  const events = await pool.list(RELAYS, [{kinds:[30315], authors: pubkeys, limit: pubkeys.length}]);
+  const presence = {};
+  const now = Math.floor(Date.now()/1000);
+  events.forEach(e => {
+    // Online if status published in last 3 minutes
+    if(now - e.created_at < 180) {
+      presence[e.pubkey] = true;
+    }
+  });
+  return presence;
+}
+
 async function init(){
   // Back button closes modals/sidebar before navigating away
   // Mobile swipe-to-close sidebar
@@ -2099,6 +2527,14 @@ async function init(){
   if(loadUser()){
     render(); // show app instantly, empty groups
     loadGroups(); // fetch in background, will re-render when done
+    // NIP-38: broadcast presence every 2 minutes
+    broadcastPresence();
+    setInterval(broadcastPresence, 120000);
+    // Broadcast offline on page close
+    window.addEventListener('beforeunload', () => {
+      const event = finishEvent({kind:30315, content:'{"status":"offline"}', tags:[['d','general']], created_at:Math.floor(Date.now()/1000)}, state.user.sk);
+      Promise.any(pool.publish(RELAYS, event)).catch(()=>{});
+    });
     // Auto-join if pending
     if(state.pendingJoinId){
       setTimeout(()=>{
@@ -2141,7 +2577,7 @@ window.viewProfile=viewProfile;window.closeViewProfile=closeViewProfile;window.s
 window.logout=logout;window.onSearchInput=onSearchInput;window.onDMSearchInput=onDMSearchInput;
 window.onMsgInput=onMsgInput;window.onMsgKeydown=onMsgKeydown;window.onDMMsgKeydown=onDMMsgKeydown;window.autoResize=autoResize;window.insertMention=insertMention;
 window.scrollToBottom=scrollToBottom;window.toggleReaction=toggleReaction;
-window.startEdit=startEdit;window.deleteMessage=deleteMessage;window.pinMessage=pinMessage;window.copyMessage=copyMessage;
+window.startEdit=startEdit;window.deleteMessage=deleteMessage;window.pinMessage=pinMessage;window.copyMessage=copyMessage;window.hideMessage=hideMessage;window.muteUserInSaloon=muteUserInSaloon;window.handleFileUpload=handleFileUpload;
 window.showCreateGroupModal=showCreateGroupModal;window.closeCreateGroupModal=closeCreateGroupModal;
 window.setGroupModalMode=setGroupModalMode;window.submitCreateGroup=submitCreateGroup;
 window.submitJoinGroup=submitJoinGroup;
