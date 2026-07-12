@@ -34,6 +34,8 @@
   --glow-accent: 0 0 12px rgba(184,144,26,.20);
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+*::placeholder{color:var(--text-tertiary);opacity:.65}
+input,textarea,button{font-family:inherit}
 html{scroll-behavior:smooth;scroll-height:100%}
 body{
   font-family:'Inter',system-ui,sans-serif;
@@ -211,12 +213,12 @@ body{
 .modal-form .field input:focus,.modal-form .field textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(212,160,23,.12)}
 .modal-form .field textarea{resize:vertical;min-height:50px}
 .modal-form .field label{display:block;font-size:.85em;color:var(--text-secondary);margin-bottom:4px}
-.modal-form .field{margin-bottom:12px;text-align:left}
-.modal-form .options{display:flex;gap:8px;margin-bottom:12px}
-.modal-form .options button{flex:1;padding:10px;border-radius:var(--radius-sm);cursor:pointer;font-family:inherit;font-size:.85em;border:1px solid var(--border);background:transparent;color:var(--text-secondary);transition:all .2s ease}
-.modal-form .options button:hover{border-color:var(--text-secondary)}
-.modal-form .options button.active{border-color:var(--accent);color:var(--accent);background:var(--bg-elevated)}
-.modal-form .btns{display:flex;gap:8px;margin-top:16px}
+.modal-form .field{margin-bottom:14px;text-align:left}
+.modal-form .options{display:flex;margin-bottom:16px;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden}
+.modal-form .options button{flex:1;padding:10px;cursor:pointer;font-family:inherit;font-size:.88em;border:none;background:transparent;color:var(--text-secondary);transition:all .15s ease}
+.modal-form .options button:hover{background:var(--bg-hover)}
+.modal-form .options button.active{background:var(--accent);color:#000;font-weight:600}
+.modal-form .btns{display:flex;gap:8px;margin-top:20px}
 .modal-form .btns button{flex:1;padding:10px;border-radius:var(--radius-sm);cursor:pointer;font-family:inherit;font-size:.9em;transition:all .2s ease}
 .modal-form .save{background:var(--accent);color:#000;border:none;font-weight:600;box-shadow:var(--shadow-sm)}
 .modal-form .save:hover{background:var(--accent-bright)}
