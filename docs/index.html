@@ -62,7 +62,7 @@ body{
 .main{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative}
 
 .sidebar-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;transition:background .2s ease}
-.sidebar-header h1{font-family:'Rye',serif;font-size:1.1em;color:var(--accent-bright);text-shadow:0 1px 8px rgba(212,160,23,.15)}
+.sidebar-header h1{font-family:'Rye',serif;font-size:1.1em;color:var(--accent-bright)}
 .theme-toggle{background:none;border:1px solid var(--border);color:var(--text);font-size:1em;cursor:pointer;padding:6px 10px;border-radius:var(--radius-sm);transition:all .2s ease;backdrop-filter:blur(4px)}
 .theme-toggle:hover{border-color:var(--accent);color:var(--accent);box-shadow:var(--glow-accent)}
 .theme-toggle:active{transform:scale(.95)}
@@ -130,7 +130,7 @@ body{
 .msg-input button:active{transform:scale(.95)}
 
 .onboard{max-width:440px;margin:80px auto;padding:32px;text-align:center}
-.onboard h1{font-family:'Rye',serif;font-size:2.4em;color:var(--accent-bright);margin-bottom:8px;text-shadow:0 2px 20px rgba(212,160,23,.2)}
+.onboard h1{font-family:'Rye',serif;font-size:2.4em;color:var(--accent-bright);margin-bottom:8px}
 .onboard p{color:var(--text-secondary);margin-bottom:28px}
 .onboard .field{margin-bottom:16px;text-align:left}
 .onboard label{display:block;font-size:.85em;color:var(--text-secondary);margin-bottom:4px}
@@ -150,7 +150,7 @@ body{
 @keyframes modalOverlay{from{opacity:0}to{opacity:1}}
 .profile-modal .panel{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;max-width:400px;width:90%;box-shadow:var(--shadow-lg);animation:modalIn .25s cubic-bezier(.4,0,.2,1)}
 @keyframes modalIn{from{opacity:0;transform:scale(.95) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}
-.profile-modal h2{font-family:'Rye',serif;color:var(--accent-bright);margin-bottom:16px;text-shadow:0 2px 12px rgba(212,160,23,.15)}
+.profile-modal h2{font-family:'Rye',serif;color:var(--accent-bright);margin-bottom:16px}
 .profile-modal .field{margin-bottom:12px;text-align:left}
 .profile-modal label{display:block;font-size:.85em;color:var(--text-secondary);margin-bottom:4px}
 .profile-modal input,.profile-modal textarea{width:100%;background:var(--bg-elevated);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:var(--radius-sm);font-family:inherit;font-size:.9em;transition:border-color .2s ease,box-shadow .2s ease}
@@ -951,7 +951,7 @@ function loadUser(){const s=localStorage.getItem('saloon-user');if(s){state.user
 async function loadGroups(){state.groups=await fetchMyGroups();for(const g of state.groups){state.channels[g.id]=await fetchChannels(g.id)}render()}
 
 async function selectGroup(groupId){
-  state.activeGroup=groupId;state.activeChannel=null;state.activeDM=null;state.sidebarOpen=false;
+  state.activeGroup=groupId;state.activeChannel=null;state.activeDM=null;if(window.innerWidth<768)state.sidebarOpen=false;
   if(!state.channels[groupId])state.channels[groupId]=await fetchChannels(groupId);
   const g=state.groups.find(x=>x.id===groupId);
   // Auto-select first channel if exists
@@ -965,7 +965,7 @@ async function selectGroup(groupId){
 }
 
 async function selectChannel(groupId,channelId){
-  state.activeGroup=groupId;state.activeChannel=channelId;state.activeDM=null;state.sidebarOpen=false;
+  state.activeGroup=groupId;state.activeChannel=channelId;state.activeDM=null;if(window.innerWidth<768)state.sidebarOpen=false;
   state.atBottom=true;
   const ch=(state.channels[groupId]||[]).find(c=>c.id===channelId);
   state.activeChannelName=ch?.name||'general';state.activeChannelDesc=ch?.about||'';
@@ -980,7 +980,7 @@ async function selectChannel(groupId,channelId){
 }
 
 async function selectDM(pubkey){
-  state.activeDM=pubkey;state.activeChannel=null;state.sidebarOpen=false;
+  state.activeDM=pubkey;state.activeChannel=null;if(window.innerWidth<768)state.sidebarOpen=false;
   const dms=JSON.parse(localStorage.getItem('saloon-dms')||'[]');
   const dm=dms.find(d=>d.pubkey===pubkey);state.activeDMName=dm?.name||pubkey.slice(0,12);
   state.messages=await fetchDMs(pubkey);render();
