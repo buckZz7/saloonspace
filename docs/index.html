@@ -73,6 +73,7 @@ body{
 .relay-dot.connected{background:var(--green)}
 @keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
 @keyframes spin{to{transform:rotate(360deg)}}
+.presence-dot{position:absolute;bottom:0;right:0;width:10px;height:10px;background:var(--green);border-radius:50%;border:2px solid var(--bg-card)}
 .theme-toggle{background:var(--bg-card);border:1px solid var(--border);color:var(--accent);width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:all .15s ease;flex-shrink:0;cursor:pointer}
 .theme-toggle:hover{background:var(--bg-hover);color:var(--accent-bright)}
 .theme-toggle:active{transform:scale(.92)}
@@ -276,6 +277,88 @@ body{
   .msg-input{padding-left:12px;padding-right:12px}
   .messages{padding-left:12px;padding-right:12px}
 }
+
+/* Reply preview bar */
+.reply-preview-bar{padding:6px 16px;background:color-mix(in srgb,var(--bg-elevated) 80%,transparent);border-left:3px solid var(--accent);border-radius:var(--radius-sm);margin:0 16px 4px;display:flex;align-items:center;gap:8px;font-size:.82em;color:var(--text-secondary);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.reply-preview-bar .cancel-reply{margin-left:auto;background:none;border:none;color:var(--text-tertiary);cursor:pointer;font-size:1.1em;padding:2px 6px;flex-shrink:0;transition:color .15s ease}
+.reply-preview-bar .cancel-reply:hover{color:var(--danger)}
+
+/* Inline reply quote in messages */
+.reply-quote{border-left:2px solid var(--border-light);padding:2px 8px;margin-bottom:4px;font-size:.82em;color:var(--text-tertiary);cursor:pointer;transition:border-color .15s ease,background .15s ease;border-radius:0 var(--radius-sm) var(--radius-sm) 0}
+.reply-quote:hover{border-left-color:var(--accent);background:rgba(212,160,23,.06)}
+.reply-quote .reply-author{color:var(--accent);font-weight:600}
+.reply-quote .reply-text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block;max-width:300px;vertical-align:bottom}
+
+/* Chat header action buttons */
+.chat-header-actions{display:flex;align-items:center;gap:4px}
+.chat-header-actions .header-btn{background:none;border:1px solid var(--border);color:var(--text-secondary);width:34px;height:34px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s ease;flex-shrink:0}
+.chat-header-actions .header-btn:hover{border-color:var(--accent);color:var(--accent-bright);background:var(--bg-elevated)}
+.chat-header-actions .header-btn:active{transform:scale(.92)}
+.chat-header-actions .header-btn svg{width:18px;height:18px}
+
+/* Channel search in chat area */
+.channel-search-bar{padding:6px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;background:var(--bg-card)}
+.channel-search-bar input{flex:1;background:var(--bg-elevated);border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:var(--radius-sm);font-size:.88em;font-family:inherit;transition:border-color .2s ease}
+.channel-search-bar input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(212,160,23,.12)}
+.channel-search-bar .clear-search{background:none;border:none;color:var(--text-tertiary);cursor:pointer;font-size:1em;padding:4px;transition:color .15s ease}
+.channel-search-bar .clear-search:hover{color:var(--danger)}
+.search-highlight{background:rgba(240,192,64,.3);border-radius:2px;padding:1px 2px}
+.search-no-results{color:var(--text-tertiary);text-align:center;padding:40px}
+
+/* Category dividers in channel list */
+.channel-category{font-size:.65em;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-tertiary);padding:8px 16px 2px;user-select:none}
+
+/* Members panel (slide-in from right) */
+.members-panel{position:fixed;top:0;right:0;bottom:0;width:300px;background:var(--bg-card);border-left:1px solid var(--border);box-shadow:var(--shadow-lg);z-index:250;display:flex;flex-direction:column;animation:membersSlideIn .25s cubic-bezier(.4,0,.2,1);transform-origin:right center}
+@keyframes membersSlideIn{from{transform:translateX(100%);opacity:.7}to{transform:translateX(0);opacity:1}}
+.members-panel .members-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.members-panel .members-header h3{flex:1;font-size:1em;color:var(--accent-bright);font-weight:600}
+.members-panel .close-btn{background:none;border:1px solid var(--border);color:var(--text-secondary);width:28px;height:28px;border-radius:var(--radius-sm);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s ease}
+.members-panel .close-btn:hover{border-color:var(--danger);color:var(--danger)}
+.members-panel .members-list{flex:1;overflow-y:auto;padding:8px 0}
+.members-panel .member-item{padding:10px 20px;display:flex;align-items:center;gap:10px;transition:background .15s ease}
+.members-panel .member-item:hover{background:var(--bg-hover)}
+.members-panel .member-item .avatar{width:36px;height:36px;border-radius:50%;background:var(--bg-elevated);display:flex;align-items:center;justify-content:center;font-size:.9em;font-weight:600;color:#fff;border:1px solid var(--border);flex-shrink:0;overflow:hidden}
+.members-panel .member-item .avatar img{width:100%;height:100%;object-fit:cover}
+.members-panel .member-info{flex:1;min-width:0}
+.members-panel .member-info .mname{font-size:.88em;font-weight:600}
+.members-panel .member-info .mnpub{font-size:.7em;color:var(--text-tertiary);font-family:monospace;word-break:break-all}
+.members-panel .member-count{font-size:.78em;color:var(--text-tertiary);padding:4px 20px}
+
+/* Settings page (full panel like .onboard) */
+.settings-page{max-width:500px;margin:40px auto;padding:32px;text-align:left;overflow-y:auto;max-height:calc(100vh - 80px)}
+.settings-page h1{font-family:'Rye',serif;font-size:2em;color:var(--accent-bright);margin-bottom:8px;text-align:center;letter-spacing:.5px}
+.settings-page .settings-section{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:20px;margin-bottom:16px}
+.settings-page .settings-section h2{font-size:1em;color:var(--accent);margin-bottom:12px;text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+.settings-page .field{margin-bottom:14px}
+.settings-page label{display:block;font-size:.85em;color:var(--text-secondary);margin-bottom:4px}
+.settings-page input,.settings-page textarea,.settings-page select{width:100%;background:var(--bg-elevated);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:var(--radius-sm);font-family:inherit;font-size:.92em;transition:border-color .2s ease,box-shadow .2s ease}
+.settings-page input:focus,.settings-page textarea:focus,.settings-page select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(212,160,23,.12)}
+.settings-page textarea{resize:vertical;min-height:60px}
+.settings-page .toggle-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0}
+.settings-page .toggle-row label{margin-bottom:0}
+.settings-page .toggle-switch{position:relative;width:44px;height:24px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:12px;cursor:pointer;transition:background .2s ease;flex-shrink:0}
+.settings-page .toggle-switch.on{background:var(--accent);border-color:var(--accent)}
+.settings-page .toggle-switch::after{content:'';position:absolute;top:2px;left:2px;width:18px;height:18px;background:#fff;border-radius:50%;transition:transform .2s ease}
+.settings-page .toggle-switch.on::after{transform:translateX(20px)}
+.settings-page .relay-status{display:flex;align-items:center;gap:8px;font-size:.88em;color:var(--text-secondary)}
+.settings-page .key-section{background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;margin-top:8px}
+.settings-page .key-section .key-label{font-size:.78em;color:var(--text-tertiary);margin-bottom:4px}
+.settings-page .key-section .key-val{font-family:monospace;font-size:.8em;word-break:break-all;color:var(--text-secondary)}
+.settings-page .btn-row{display:flex;gap:8px;margin-top:16px}
+.settings-page .btn-row button{flex:1;padding:12px;border-radius:var(--radius-sm);cursor:pointer;font-family:inherit;font-size:.92em;transition:all .15s ease}
+.settings-page .btn-save{background:var(--accent);color:#000;border:none;font-weight:600;box-shadow:var(--shadow-sm)}
+.settings-page .btn-save:hover{background:var(--accent-bright)}
+.settings-page .btn-save:active{transform:scale(.97)}
+.settings-page .btn-logout{background:transparent;color:var(--danger);border:1px solid var(--danger)}
+.settings-page .btn-logout:hover{background:var(--danger);color:#fff}
+.settings-page .btn-close{background:transparent;color:var(--text-secondary);border:1px solid var(--border)}
+.settings-page .btn-close:hover{border-color:var(--text-secondary)}
+
+@media(max-width:768px){
+  .members-panel{width:100%}
+  .settings-page{margin:16px;padding:16px}
+}
 </style>
 </head>
 <body>
@@ -301,6 +384,8 @@ let state = {
   createGroupModalMode: 'create', showSettingsModal: false,
   editingMessageId: null, reactions: {}, typingUsers: {},
   mentionQuery: null, atBottom: true,
+  replyingTo: null, replyingToContent: null, showMembersPanel: false,
+  channelSearchQuery: '', showSettingsPage: false,
 };
 const RELAYS = ['wss://relay.damus.io', 'wss://nos.lol', 'wss://relay.nostr.band'];
 let pool = null; let sub = null;
@@ -395,19 +480,33 @@ async function fetchMessages(channelId){
   const seen=new Set();const deduped=[];
   for(const e of events.sort((a,b)=>a.created_at-b.created_at)){
     if(seen.has(e.id))continue;seen.add(e.id);
-    deduped.push({id:e.id,content:e.content,author:e.pubkey,time:new Date(e.created_at*1000),isBot:false});
+    // Parse reply tag (NIP-10: e tag with marker 'reply')
+    const replyTag=e.tags.find(t=>t[0]==='e'&&t[3]==='reply');
+    deduped.push({id:e.id,content:e.content,author:e.pubkey,time:new Date(e.created_at*1000),isBot:false,replyTo:replyTag?replyTag[1]:null});
   }
   return deduped;
 }
 
-async function sendMessage(channelId,text){
+async function sendMessage(channelId,text,replyToId){
   await initPool();
-  const event=finishEvent({kind:42,content:text,tags:[['e',channelId,RELAYS[0],'root']],created_at:Math.floor(Date.now()/1000)},state.user.sk);
+  const tags=[['e',channelId,RELAYS[0],'root']];
+  if(replyToId){
+    tags.push(['e',replyToId,RELAYS[0],'reply']);
+  }
+  const event=finishEvent({kind:42,content:text,tags,created_at:Math.floor(Date.now()/1000)},state.user.sk);
   try{await Promise.any(pool.publish(RELAYS,event))}catch(e){console.warn('publish',e)}
-  if(!state.messages.some(m=>m.id===event.id))state.messages.push({id:event.id,content:text,author:state.user.pk,time:new Date(),isBot:false});
+  if(!state.messages.some(m=>m.id===event.id))state.messages.push({id:event.id,content:text,author:state.user.pk,time:new Date(),isBot:false,replyTo:replyToId||null});
   render();
 }
 
+let messageSound=null;
+function playMessageSound(){
+  try{
+    if(!messageSound)messageSound=new Audio('data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=');
+    messageSound.volume=0.15;
+    messageSound.play().catch(()=>{});
+  }catch(e){}
+}
 function subscribeMessages(channelId){
   if(sub)sub.unsub();
   initPool().then(()=>{
@@ -415,7 +514,8 @@ function subscribeMessages(channelId){
     sub.on('event',(event)=>{
       // Deduplicate by event ID
       if(state.messages.some(m=>m.id===event.id))return;
-      state.messages.push({id:event.id,content:event.content,author:event.pubkey,time:new Date(event.created_at*1000),isBot:false});
+      const replyTag=event.tags.find(t=>t[0]==='e'&&t[3]==='reply');
+      state.messages.push({id:event.id,content:event.content,author:event.pubkey,time:new Date(event.created_at*1000),isBot:false,replyTo:replyTag?replyTag[1]:null});
       // Check for edit tags
       const editTag = event.tags.find(t=>t[0]==='edit');
       if(editTag){
@@ -427,6 +527,7 @@ function subscribeMessages(channelId){
         render();scrollMessages();
       } else {
         incrementUnread(channelId);
+        playMessageSound();
         render();
       }
     });
@@ -447,6 +548,27 @@ async function editMessage(channelId, messageId, newText) {
 }
 
 // --- Message deletion (kind 5) ---
+function pinMessage(messageId){
+  const channel=state.activeChannel;
+  const pinned=JSON.parse(localStorage.getItem('saloon-pinned-'+channel)||'null');
+  if(pinned===messageId){
+    localStorage.removeItem('saloon-pinned-'+channel);
+    showToast('Message unpinned');
+  } else {
+    localStorage.setItem('saloon-pinned-'+channel,JSON.stringify(messageId));
+    showToast('Message pinned');
+  }
+  render();
+}
+function renderPinnedMessage(){
+  if(!state.activeChannel)return'';
+  const pinnedId=JSON.parse(localStorage.getItem('saloon-pinned-'+state.activeChannel)||'null');
+  if(!pinnedId)return'';
+  const msg=state.messages.find(m=>m.id===pinnedId);
+  if(!msg)return'';
+  const name=state.profiles[msg.author]?.name||msg.author.slice(0,8)+'…';
+  return `<div style="padding:8px 16px;background:var(--bg-elevated);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;font-size:.85em"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><line x1="4" y1="22" x2="4" y2="15"/><path d="M4 15 L8 15 L8 3 L16 3 L16 15 L20 15"/></svg><span style="color:var(--text-secondary);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><strong>${escapeHtml(name)}:</strong> ${escapeHtml(msg.content.slice(0,80))}</span><button onclick="pinMessage('${pinnedId}')" style="background:none;border:none;color:var(--text-tertiary);cursor:pointer;font-size:1em;padding:2px">✕</button></div>`;
+}
 async function deleteMessage(messageId) {
   await initPool();
   const event = finishEvent({kind:5, content:'', tags:[['e',messageId]], created_at:Math.floor(Date.now()/1000)}, state.user.sk);
@@ -588,9 +710,10 @@ function getLastRead(channelId) {
 }
 function markRead(channelId) {
   localStorage.setItem('saloon-lastread-'+channelId, String(Math.floor(Date.now()/1000)));
+  localStorage.removeItem('saloon-unread-'+channelId);
 }
 function getUnreadCount(channelId) {
-  if(state.activeChannel===channelId)return 0;
+  if(state.activeChannel===channelId && state.atBottom)return 0;
   const lastRead = getLastRead(channelId);
   if(!state.messages.length)return 0;
   return parseInt(localStorage.getItem('saloon-unread-'+channelId)||'0');
@@ -655,6 +778,7 @@ function render(){
   applyTheme();
   if(state.view==='onboard'||!state.user){app.innerHTML=renderOnboard();return}
   if(state.view==='keybackup'){app.innerHTML=renderKeyBackup();return}
+  if(state.view==='settings'){app.innerHTML=renderSettingsPage();return}
   let html=renderMain();
   if(state.showProfile)html+=renderProfileModal();
   if(state.viewingProfile)html+=renderViewProfileModal();
@@ -662,6 +786,7 @@ function render(){
   if(state.showCreateChannelModal)html+=renderCreateChannelModal();
   if(state.showNewDMModal)html+=renderNewDMModal();
   if(state.showSettingsModal)html+=renderSettingsModal();
+  if(state.showMembersPanel)html+=renderMembersPanel();
   app.innerHTML=html;
   setupScrollListener();
   if(state.activeChannel||state.activeDM)scrollMessages();
@@ -677,7 +802,7 @@ function renderMain(){
           <button class="theme-toggle" onclick="toggleTheme()" title="${state.theme==='dark'?'Light mode':'Dark mode'}" aria-label="Toggle theme">${state.theme==='dark'?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>'}</button>
         </div>
         <div class="profile-section">
-          <div style="display:flex;align-items:center;gap:10px;cursor:pointer" onclick="openProfile()">
+          <div style="display:flex;align-items:center;gap:10px;cursor:pointer" onclick="openSettingsPage()">
             <span class="avatar" style="margin-right:0;background:${avatarBg(state.user.pk)};color:#fff;border:none">${(state.user.name||'?')[0].toUpperCase()}</span>
             <div style="flex:1;min-width:0">
               <div class="pname">${escapeHtml(state.user.name||'Anon')}</div>
@@ -725,10 +850,33 @@ function renderGroupsTab(){
 
 function renderChannels(groupId){
   const channels=state.channels[groupId]||[];
-  return `<div class="channels-list">${channels.map(c=>{
-    const unread=getUnreadCount(c.id);
-    return `<div class="channel-item ${state.activeChannel===c.id?'active':''}" onclick="selectChannel('${groupId}','${c.id}')" style="display:flex;justify-content:space-between;align-items:center">${escapeHtml(c.name)}${unread>0?`<span class="unread-badge">${unread>99?'99+':unread}</span>`:''}</div>`;
-  }).join('')}<div class="channel-item" style="color:var(--text-tertiary)" onclick="showCreateChannelModal('${groupId}')">+ add table</div></div>`;
+  // Group channels into categories
+  const tables=[]; const backRoom=[];
+  for(const c of channels){
+    const cn=(c.name||'').toLowerCase();
+    if(cn.includes('voice')||cn.includes('back')||cn.includes('backroom')){
+      backRoom.push(c);
+    } else {
+      tables.push(c);
+    }
+  }
+  let html='<div class="channels-list">';
+  if(tables.length>0){
+    html+='<div class="channel-category">Tables</div>';
+    html+=tables.map(c=>{
+      const unread=getUnreadCount(c.id);
+      return `<div class="channel-item ${state.activeChannel===c.id?'active':''}" onclick="selectChannel('${groupId}','${c.id}')" style="display:flex;justify-content:space-between;align-items:center">${escapeHtml(c.name)}${unread>0?`<span class="unread-badge">${unread>99?'99+':unread}</span>`:''}</div>`;
+    }).join('');
+  }
+  if(backRoom.length>0){
+    html+='<div class="channel-category">Back Room</div>';
+    html+=backRoom.map(c=>{
+      const unread=getUnreadCount(c.id);
+      return `<div class="channel-item ${state.activeChannel===c.id?'active':''}" onclick="selectChannel('${groupId}','${c.id}')" style="display:flex;justify-content:space-between;align-items:center">${escapeHtml(c.name)}${unread>0?`<span class="unread-badge">${unread>99?'99+':unread}</span>`:''}</div>`;
+    }).join('');
+  }
+  html+=`<div class="channel-item" style="color:var(--text-tertiary)" onclick="showCreateChannelModal('${groupId}')">+ add table</div></div>`;
+  return html;
 }
 
 function renderDMsTab(){
@@ -745,6 +893,8 @@ function renderDMsTab(){
 
 function renderChatArea(){
   if(state.activeChannel){
+    const searchIcon=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>`;
+    const membersIcon=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`;
     return `
       <div class="chat-header">
         <div style="display:flex;align-items:center;">
@@ -752,11 +902,18 @@ function renderChatArea(){
           <div><div class="channel-name" style="cursor:pointer" onclick="openSettings('${state.activeGroup}')"># ${escapeHtml(state.activeChannelName||'general')}</div>
           <div class="channel-desc">${escapeHtml(state.activeChannelDesc||'')}</div></div>
         </div>
+        <div class="chat-header-actions">
+          <button class="header-btn" onclick="toggleChannelSearch()" title="Search messages">${searchIcon}</button>
+          <button class="header-btn" onclick="openMembersPanel()" title="Members">${membersIcon}</button>
+        </div>
       </div>
+      ${state.channelSearchQuery!==''?`<div class="channel-search-bar"><input type="text" id="channelSearchInput" placeholder="Search messages..." value="${escapeHtml(state.channelSearchQuery)}" oninput="onChannelSearchInput(this.value)"><button class="clear-search" onclick="clearChannelSearch()">✕</button></div>`:''}
+      ${renderPinnedMessage()}
       <div class="messages" id="messages">${renderMessages()}</div>
       <div class="typing-indicator" id="typingIndicator" style="display:none"></div>
       ${state.atBottom?'':`<button class="scroll-bottom-btn" id="scrollBottomBtn" onclick="scrollToBottom()">↓</button>`}
       ${state.mentionQuery?renderMentionPopup():''}
+      ${state.replyingTo?`<div class="reply-preview-bar"><span>Replying to: <strong>${escapeHtml((state.replyingToContent||'').slice(0,40))}</strong></span><button class="cancel-reply" onclick="cancelReply()">✕</button></div>`:''}
       <div class="msg-input">
         <textarea id="msgText" rows="1" placeholder="Type your message..." oninput="onMsgInput(this.value);autoResize(this)" onkeydown="onMsgKeydown(event)">${state.editingMessageId?(state.messages.find(m=>m.id===state.editingMessageId)?.content||''):''}</textarea>
         <button onclick="sendMsg()">Send</button>
@@ -794,16 +951,24 @@ function renderChatArea(){
 function renderMessages(){
   if(state.loadingMessages)return '<div style="color:var(--text-tertiary);text-align:center;padding:40px"><div style="display:inline-block;width:24px;height:24px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite;margin-bottom:8px"></div><div>Loading messages…</div></div>';
   if(!state.messages.length)return '<div style="color:var(--text-tertiary);text-align:center;padding:40px">No messages yet. Say howdy.</div>';
+  // Search filtering
+  const searchQ=(state.channelSearchQuery||'').toLowerCase();
+  let msgs=state.messages;
+  if(searchQ){
+    msgs=state.messages.filter(m=>m.content.toLowerCase().includes(searchQ));
+    if(msgs.length===0)return '<div class="search-no-results">No results found for "'+escapeHtml(state.channelSearchQuery)+'"</div>';
+  }
   const now=Date.now();
-  return state.messages.map((m,i)=>{
+  return msgs.map((m,i)=>{
     const isOwn=m.author===state.user.pk;
     const name=isOwn?(state.user.name||'You'):(state.profiles[m.author]?.name||m.author.slice(0,8)+'…');
     const pic=state.profiles[m.author]?.picture;
     const isAgent=state.profiles[m.author]?.isAgent;
     // Message grouping: same author within 5 min
-    const prev=state.messages[i-1];
+    const prev=msgs[i-1];
     const grouped=prev&&prev.author===m.author&&(m.time-prev.time)<300000&&!m.edited;
-    const avatar=pic?`<div class="avatar"><img src="${escapeHtml(pic)}" onerror="this.style.display='none';this.parentElement.textContent='${escapeHtml(name[0]?.toUpperCase()||'?')}'"></div>`:`<div class="avatar" style="background:${avatarBg(m.author)};color:#fff;border:none">${escapeHtml(name[0]?.toUpperCase()||'?')}</div>`;
+    const isOnline=(now-m.time.getTime())<120000; // active within 2 min
+    const avatar=pic?`<div class="avatar" style="position:relative"><img src="${escapeHtml(pic)}" onerror="this.style.display='none';this.parentElement.textContent='${escapeHtml(name[0]?.toUpperCase()||'?')}'">${isOnline&&!grouped?'<span class="presence-dot"></span>':''}</div>`:`<div class="avatar" style="background:${avatarBg(m.author)};color:#fff;border:none;position:relative">${escapeHtml(name[0]?.toUpperCase()||'?')}${isOnline&&!grouped?'<span class="presence-dot"></span>':''}</div>`;
     // Reactions
     const reacts=(state.reactions[m.id]||[]);
     const emojiCounts={};
@@ -812,18 +977,31 @@ function renderMessages(){
       const mine=authors.includes(state.user.pk);
       return `<span class="reaction-pill ${mine?'mine':''}" onclick="toggleReaction('${m.id}','${emoji}')">${emoji}<span class="count">${authors.length}</span></span>`;
     }).join('')}</div>`:'';
-    // Action menu for own messages
-    const actionsHtml=isOwn?`<div class="msg-actions"><button onclick="startEdit('${m.id}')">Edit</button><button onclick="deleteMessage('${m.id}')">Delete</button></div>`:'';
+    // Action menu — Reply for all, Edit/Delete for own messages
+    const actionsHtml=`<div class="msg-actions"><button onclick="pinMessage('${m.id}')">Pin</button><button onclick="startReply('${m.id}')">Reply</button>${isOwn?`<button onclick="startEdit('${m.id}')">Edit</button><button onclick="deleteMessage('${m.id}')">Delete</button>`:''}</div>`;
     // Reaction bar (for all messages)
     const reactionBar=`<div class="reaction-bar"><button onclick="toggleReaction('${m.id}','👍')">👍</button><button onclick="toggleReaction('${m.id}','❤️')">❤️</button><button onclick="toggleReaction('${m.id}','😂')">😂</button><button onclick="toggleReaction('${m.id}','🤠')">🤠</button></div>`;
+    // Reply quote — if this message is a reply, look up the original
+    let replyQuoteHtml='';
+    if(m.replyTo){
+      const origMsg=state.messages.find(x=>x.id===m.replyTo);
+      if(origMsg){
+        const origName=origMsg.author===state.user.pk?(state.user.name||'You'):(state.profiles[origMsg.author]?.name||origMsg.author.slice(0,8)+'…');
+        const origText=escapeHtml(origMsg.content.slice(0,80));
+        replyQuoteHtml=`<div class="reply-quote" onclick="scrollToMessage('${origMsg.id}')"><span class="reply-author">${escapeHtml(origName)}</span> <span class="reply-text">${origText}</span></div>`;
+      } else {
+        replyQuoteHtml=`<div class="reply-quote"><span class="reply-author">Reply</span> <span class="reply-text">Original message not available</span></div>`;
+      }
+    }
     return `
-    <div class="msg ${grouped?'grouped':''}">
+    <div class="msg ${grouped?'grouped':''}" data-msg-id="${m.id}">
       ${avatar}
       <div class="body">
         ${reactionBar}
         ${actionsHtml}
+        ${replyQuoteHtml}
         <div class="author"><span class="name" onclick="viewProfile('${m.author}')">${escapeHtml(name)}</span>${isAgent?'<span class="agent-tag">AGENT</span>':''}<span class="time">${formatTime(m.time,prev?.time)}${m.edited?' (edited)':''}</span></div>
-        <div class="content">${renderMarkdown(m.content)}</div>
+        <div class="content">${searchQ?highlightSearch(renderMarkdown(m.content),state.channelSearchQuery):renderMarkdown(m.content)}</div>
         ${reactionsHtml}
       </div>
     </div>`;
@@ -994,6 +1172,88 @@ function renderMentionPopup(){
     const pic=state.profiles[pk]?.picture;
     return `<div class="item" onclick="insertMention('${pk}')">${pic?`<img src="${escapeHtml(pic)}" style="width:24px;height:24px;border-radius:50%;object-fit:cover">`:`<div class="avatar-sm">${escapeHtml(name[0]?.toUpperCase()||'?')}</div>`}<span>${escapeHtml(name)}</span></div>`;
   }).join('')}</div>`;
+}
+
+function renderMembersPanel(){
+  // Collect unique authors from messages + saloon owner
+  const authorSet=new Set();
+  state.messages.forEach(m=>authorSet.add(m.author));
+  if(state.activeGroup){
+    const g=state.groups.find(x=>x.id===state.activeGroup);
+    if(g&&g.pubkey)authorSet.add(g.pubkey);
+  }
+  const members=[...authorSet];
+  const closeIcon=`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`;
+  let membersHtml=members.map(pk=>{
+    const prof=state.profiles[pk]||{};
+    const name=pk===state.user.pk?(state.user.name||'You'):(prof.name||pk.slice(0,8)+'…');
+    const pic=prof.picture;
+    const isAgent=prof.isAgent;
+    const avatar=pic?`<div class="avatar"><img src="${escapeHtml(pic)}" onerror="this.style.display='none';this.parentElement.textContent='${escapeHtml(name[0]?.toUpperCase()||'?')}'"></div>`:`<div class="avatar" style="background:${avatarBg(pk)};border:none">${escapeHtml(name[0]?.toUpperCase()||'?')}</div>`;
+    return `<div class="member-item" onclick="viewProfile('${pk}')">${avatar}<div class="member-info"><div class="mname">${escapeHtml(name)}${isAgent?' 🤖':''}${pk===state.user.pk?' <span style="font-size:.7em;color:var(--text-tertiary)">(you)</span>':''}</div><div class="mnpub">${npubEncode(pk).slice(0,20)}…</div></div></div>`;
+  }).join('');
+  return `<div class="members-panel">
+    <div class="members-header">
+      <h3>Members</h3>
+      <button class="close-btn" onclick="closeMembersPanel()">${closeIcon}</button>
+    </div>
+    <div class="member-count">${members.length} member${members.length!==1?'s':''}</div>
+    <div class="members-list">${membersHtml}</div>
+  </div>`;
+}
+
+function renderSettingsPage(){
+  const isAgent=state.user.isAgent||false;
+  const isDark=state.theme==='dark';
+  const relayColor=relayStatus==='connected'?'var(--green)':relayStatus==='connecting'?'var(--accent-bright)':'var(--danger)';
+  const closeIcon=`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`;
+  return `<div class="settings-page">
+    <h1>Settings</h1>
+    <div class="settings-section">
+      <h2>Profile</h2>
+      <div class="field"><label>Display name</label><input type="text" id="settingsDisplayName" value="${escapeHtml(state.user.name||'')}" placeholder="Your name"></div>
+      <div class="field"><label>About</label><textarea id="settingsAbout" placeholder="Something about yourself...">${escapeHtml(state.user.about||'')}</textarea></div>
+      <div class="field"><label>Avatar URL</label><input type="text" id="settingsAvatar" value="${escapeHtml(state.user.picture||'')}" placeholder="https://..."></div>
+      <div class="field"><label>Link (website)</label><input type="text" id="settingsLink" value="${escapeHtml(state.user.link||'')}" placeholder="https://yoursite.com"></div>
+      <div class="toggle-row">
+        <label>I'm an agent 🤖</label>
+        <div class="toggle-switch ${isAgent?'on':''}" onclick="this.classList.toggle('on')"></div>
+      </div>
+    </div>
+    <div class="settings-section">
+      <h2>Appearance</h2>
+      <div class="toggle-row">
+        <label>Dark theme</label>
+        <div class="toggle-switch ${isDark?'on':''}" onclick="toggleTheme()"></div>
+      </div>
+    </div>
+    <div class="settings-section">
+      <h2>Connection</h2>
+      <div class="relay-status">
+        <span class="relay-dot ${relayStatus}"></span>
+        <span>Relays: ${relayStatus}</span>
+      </div>
+      <div style="font-size:.78em;color:var(--text-tertiary);margin-top:6px">${RELAYS.join(', ')}</div>
+    </div>
+    <div class="settings-section">
+      <h2>Keys</h2>
+      <div class="key-section">
+        <div class="key-label">Public key (npub)</div>
+        <div class="key-val">${state.user.npub||''}</div>
+      </div>
+      ${state.user.nsec?`<div class="key-section"><div class="key-label">Secret key (nsec) — NEVER share</div><div class="key-val">${state.user.nsec}</div></div>`:''}
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button class="btn-close" style="flex:1" onclick="copyNpub()">Copy npub</button>
+        ${state.user.nsec?'<button class="btn-close" style="flex:1" onclick="copyNsec()">Copy nsec</button>':''}
+        <button class="btn-close" style="flex:1" onclick="showKeys()">View Keys</button>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-close" onclick="closeSettingsPage()">Close</button>
+      <button class="btn-logout" onclick="logout()">Logout</button>
+      <button class="btn-save" onclick="saveSettingsPage()">Save</button>
+    </div>
+  </div>`;
 }
 
 // --- Actions ---
@@ -1258,6 +1518,131 @@ function logout(){
   location.reload();
 }
 
+// --- Reply threading ---
+function startReply(messageId){
+  const msg=state.messages.find(m=>m.id===messageId);
+  if(!msg)return;
+  state.replyingTo=messageId;
+  state.replyingToContent=msg.content;
+  state.editingMessageId=null;
+  const inp=document.getElementById('msgText');
+  if(inp){inp.focus()}
+  render();
+  const inp2=document.getElementById('msgText');
+  if(inp2){inp2.focus()}
+}
+function cancelReply(){
+  state.replyingTo=null;
+  state.replyingToContent=null;
+  render();
+  const inp=document.getElementById('msgText');
+  if(inp){inp.focus()}
+}
+function scrollToMessage(msgId){
+  const el=document.querySelector(`[data-msg-id="${msgId}"]`);
+  if(el){
+    el.scrollIntoView({behavior:'smooth',block:'center'});
+    el.style.transition='background .3s ease';
+    const origBg=el.style.background;
+    el.style.background='rgba(212,160,23,.15)';
+    setTimeout(()=>{el.style.background=origBg},1000);
+  }
+}
+
+// --- Members panel ---
+async function openMembersPanel(){
+  state.showMembersPanel=true;
+  render();
+  // Fetch any missing profiles for message authors
+  const authors=new Set(state.messages.map(m=>m.author));
+  const missing=[];
+  for(const pk of authors){
+    if(!state.profiles[pk]||Object.keys(state.profiles[pk]||{}).length===0){
+      if(pk===state.user.pk){
+        state.profiles[pk]={name:state.user.name,about:state.user.about,picture:state.user.picture,link:state.user.link,isAgent:state.user.isAgent};
+      } else {
+        missing.push(pk);
+      }
+    }
+  }
+  if(missing.length>0){
+    await initPool();
+    const events=await pool.list(RELAYS,[{kinds:[0],authors:missing,limit:missing.length}]);
+    for(const e of events){
+      try{
+        const prof=JSON.parse(e.content);
+        if(!state.profiles[e.pubkey]||Object.keys(state.profiles[e.pubkey]||{}).length===0){
+          state.profiles[e.pubkey]=prof;
+        }
+      }catch{}
+    }
+    for(const pk of missing){
+      if(!state.profiles[pk])state.profiles[pk]={};
+    }
+    render();
+  }
+}
+function closeMembersPanel(){state.showMembersPanel=false;render()}
+
+// --- Channel search ---
+function toggleChannelSearch(){
+  if(state.channelSearchQuery!==''){
+    state.channelSearchQuery='';
+  } else {
+    state.channelSearchQuery=' ';
+  }
+  render();
+  const el=document.getElementById('channelSearchInput');
+  if(el){el.focus()}
+}
+function onChannelSearchInput(val){
+  state.channelSearchQuery=val;
+  render();
+  const el=document.getElementById('channelSearchInput');
+  if(el){el.focus();el.setSelectionRange(val.length,val.length)}
+}
+function clearChannelSearch(){
+  state.channelSearchQuery='';
+  render();
+}
+function highlightSearch(html,query){
+  if(!query)return html;
+  try{
+    const escaped=query.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+    const regex=new RegExp('('+escaped+')','gi');
+    // Only highlight in text nodes, not inside HTML tags
+    return html.replace(/>([^<]+)</g,(match,text)=>{
+      return '>'+text.replace(regex,'<span class="search-highlight">$1</span>')+'<';
+    });
+  }catch(e){return html}
+}
+
+// --- Settings page ---
+function openSettingsPage(){
+  state.view='settings';
+  state.showProfile=false;
+  render();
+}
+function closeSettingsPage(){
+  state.view='app';
+  render();
+}
+async function saveSettingsPage(){
+  const name=document.getElementById('settingsDisplayName')?.value||'';
+  const about=document.getElementById('settingsAbout')?.value||'';
+  const picture=document.getElementById('settingsAvatar')?.value||'';
+  const link=document.getElementById('settingsLink')?.value||'';
+  const agentToggle=document.querySelector('.toggle-switch.on');
+  const isAgent=!!document.querySelector('.settings-section .toggle-row .toggle-switch.on');
+  state.user={...state.user,name,about,picture,link,isAgent};
+  saveUser();
+  state.profiles[state.user.pk]={name,about,picture,link,isAgent};
+  await publishProfile(name,about,picture,link,isAgent);
+  showToast('Settings saved');
+  state.view='app';
+  render();
+}
+
 // --- Search ---
 function onSearchInput(val){state.searchQuery=val;render();const el=document.querySelector('.search-box input');if(el){el.focus();el.setSelectionRange(val.length,val.length)}}
 function onDMSearchInput(val){state.dmSearchQuery=val;render();const el=document.querySelector('.search-box input');if(el){el.focus();el.setSelectionRange(val.length,val.length)}}
@@ -1321,16 +1706,21 @@ function startEdit(messageId){
   state.editingMessageId=messageId;
 }
 function cancelEdit(){state.editingMessageId=null;const inp=document.getElementById('msgText');if(inp){inp.value='';inp.focus()}}
-function onMessagesScroll(){const el=document.getElementById('messages');if(!el)return;const atBottom=el.scrollHeight-el.scrollTop-el.clientHeight<60;state.atBottom=atBottom;const btn=document.getElementById('scrollBottomBtn');if(btn){btn.style.display=atBottom?'none':'flex'}}
+function onMessagesScroll(){const el=document.getElementById('messages');if(!el)return;const atBottom=el.scrollHeight-el.scrollTop-el.clientHeight<60;state.atBottom=atBottom;const btn=document.getElementById('scrollBottomBtn');if(btn){btn.style.display=atBottom?'none':'flex'}if(atBottom&&state.activeChannel){markRead(state.activeChannel);render()}}
 
 async function sendMsg(){
   const input=document.getElementById('msgText');const text=input?.value.trim();
   if(!text)return;
+  // Clear typing indicator immediately
+  if(typingTimer){clearTimeout(typingTimer);typingTimer=null}
   if(state.editingMessageId){
     input.value='';autoResize(input);const id=state.editingMessageId;state.editingMessageId=null;
     await editMessage(state.activeChannel,id,text);
   } else {
-    if(!state.activeChannel)return;input.value='';autoResize(input);await sendMessage(state.activeChannel,text);
+    if(!state.activeChannel)return;input.value='';autoResize(input);
+    const replyTo=state.replyingTo;
+    state.replyingTo=null;state.replyingToContent=null;
+    await sendMessage(state.activeChannel,text,replyTo);
   }
 }
 
@@ -1408,7 +1798,7 @@ window.viewProfile=viewProfile;window.closeViewProfile=closeViewProfile;window.s
 window.logout=logout;window.onSearchInput=onSearchInput;window.onDMSearchInput=onDMSearchInput;
 window.onMsgInput=onMsgInput;window.onMsgKeydown=onMsgKeydown;window.onDMMsgKeydown=onDMMsgKeydown;window.autoResize=autoResize;window.insertMention=insertMention;
 window.scrollToBottom=scrollToBottom;window.toggleReaction=toggleReaction;
-window.startEdit=startEdit;window.deleteMessage=deleteMessage;
+window.startEdit=startEdit;window.deleteMessage=deleteMessage;window.pinMessage=pinMessage;
 window.showCreateGroupModal=showCreateGroupModal;window.closeCreateGroupModal=closeCreateGroupModal;
 window.setGroupModalMode=setGroupModalMode;window.submitCreateGroup=submitCreateGroup;
 window.submitJoinGroup=submitJoinGroup;
@@ -1422,6 +1812,14 @@ window.showSaloonSettings=showSettingsModal;window.closeSaloonSettings=closeSett
 window.saveSaloonSettings=submitSettings;window.removeChannelFromSaloon=removeChannel;
 window.copyNpub=copyNpub;window.onMessagesScroll=onMessagesScroll;window.showToast=showToast;
 window.cancelEdit=cancelEdit;window.showCreateChannelFromSettings=showCreateChannel;
+// Reply threading
+window.startReply=startReply;window.cancelReply=cancelReply;window.scrollToMessage=scrollToMessage;
+// Members panel
+window.openMembersPanel=openMembersPanel;window.closeMembersPanel=closeMembersPanel;
+// Channel search
+window.toggleChannelSearch=toggleChannelSearch;window.onChannelSearchInput=onChannelSearchInput;window.clearChannelSearch=clearChannelSearch;
+// Settings page
+window.openSettingsPage=openSettingsPage;window.closeSettingsPage=closeSettingsPage;window.saveSettingsPage=saveSettingsPage;
 
 // Replace placeholder handlers with real ones
 window.__doCreate = createAccount;
