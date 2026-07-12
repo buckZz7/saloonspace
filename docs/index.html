@@ -65,7 +65,7 @@ body{
 }
 .main{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative}
 
-.sidebar-header{padding:max(16px,env(safe-area-inset-top)) 20px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;transition:background .2s ease}
+.sidebar-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;transition:background .2s ease;margin-bottom:4px}
 .sidebar-header h1{font-family:'Rye',serif;font-size:1.3em;color:var(--accent-bright);flex:1;letter-spacing:.5px}
 .relay-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-left:4px;vertical-align:middle}
 .relay-dot.disconnected{background:var(--danger)}
@@ -84,13 +84,16 @@ body{
 .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--bg-elevated);color:var(--text);padding:10px 20px;border-radius:8px;border:1px solid var(--border);box-shadow:var(--shadow-md);font-size:.9em;z-index:9999;opacity:0;transition:opacity .25s ease;pointer-events:none}
 .toast.show{opacity:1}
 
-.profile-section{padding:12px 16px;border-bottom:1px solid var(--border)}
-.profile-section .pname{font-weight:600;font-size:.9em}
-.profile-section .npub{font-size:.7em;color:var(--text-tertiary);font-family:monospace;word-break:break-all}
-.profile-section .avatar{width:36px;height:36px;border-radius:50%;background:var(--bg-elevated);display:inline-flex;align-items:center;justify-content:center;font-size:1.2em;margin-right:8px;vertical-align:middle;border:1px solid var(--border);box-shadow:var(--shadow-sm);transition:box-shadow .2s ease}
+.profile-section{padding:8px 12px;border-bottom:1px solid var(--border);margin-bottom:4px}
+.profile-section .pname{font-weight:600;font-size:.88em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.profile-section .avatar{width:28px;height:28px;border-radius:50%;background:var(--bg-elevated);display:inline-flex;align-items:center;justify-content:center;font-size:.85em;flex-shrink:0;border:none;box-shadow:none;transition:box-shadow .2s ease}
 .profile-section .avatar:hover{box-shadow:var(--shadow-sm)}
+.profile-section .logout-icon{background:none;border:none;color:var(--text-tertiary);cursor:pointer;padding:4px;flex-shrink:0;transition:color .15s ease}
+.profile-section .logout-icon:hover{color:var(--danger)}
+.profile-section .profile-row{display:flex;align-items:center;gap:8px;cursor:pointer;padding:4px;border-radius:var(--radius-sm);transition:background .15s ease}
+.profile-section .profile-row:hover{background:var(--bg-hover)}
 
-.sidebar-tabs{display:flex;border-bottom:1px solid var(--border)}
+.sidebar-tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:4px}
 .sidebar-tab{flex:1;padding:12px 4px;text-align:center;cursor:pointer;font-size:.9em;color:var(--text-tertiary);border-bottom:2px solid transparent;transition:color .2s ease,border-bottom-color .2s ease,background .15s ease;-webkit-user-select:none;user-select:none}
 .sidebar-tab:hover{color:var(--text-secondary)}
 .sidebar-tab.active{color:var(--accent-bright);border-bottom:3px solid var(--accent)}
@@ -146,7 +149,7 @@ body{
 [data-theme="light"] .msg-input{background:color-mix(in srgb,var(--bg-card) 85%,transparent)}
 .msg-input input,.msg-input textarea{flex:1;background:var(--bg-elevated);border:1px solid var(--border);color:var(--text);padding:12px 16px;border-radius:var(--radius-md);font-size:.95em;font-family:inherit;transition:border-color .2s ease,box-shadow .2s ease;resize:none;overflow-y:auto;max-height:calc(1.5em*5+24px);min-height:46px;line-height:1.5}
 .msg-input input:focus,.msg-input textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(212,160,23,.12)}
-.msg-input button{background:var(--accent);color:#000;border:none;padding:12px 24px;border-radius:var(--radius-md);font-weight:600;cursor:pointer;font-size:.95em;transition:all .15s ease}
+.msg-input button{background:var(--accent);color:#000;border:none;padding:12px;border-radius:var(--radius-md);font-weight:600;cursor:pointer;font-size:.95em;transition:all .15s ease;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .msg-input button:hover{background:var(--accent-bright)}
 .msg-input button:active{transform:scale(.95)}
 
@@ -198,7 +201,7 @@ body{
 .profile-modal .cancel{background:transparent;color:var(--text-secondary);border:1px solid var(--border)}
 .profile-modal .cancel:hover{border-color:var(--text-secondary)}
 
-.search-box{padding:8px 12px;border-bottom:1px solid var(--border)}
+.search-box{padding:8px 12px;border-bottom:1px solid var(--border);margin-bottom:4px}
 .search-box input{width:100%;background:var(--bg-elevated);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:var(--radius-sm);font-size:.9em;font-family:inherit;transition:border-color .2s ease}
 .search-box input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(212,160,23,.12)}
 
@@ -242,7 +245,7 @@ body{
 
 .modal-form .field input,.modal-form .field textarea{width:100%;background:var(--bg-elevated);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:var(--radius-sm);font-family:inherit;font-size:.9em;transition:border-color .2s ease,box-shadow .2s ease}
 .modal-form .field input:focus,.modal-form .field textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(212,160,23,.12)}
-.modal-form .field textarea{resize:vertical;min-height:50px}
+.modal-form .field textarea{resize:vertical;min-height:80px}
 .modal-form .field label{display:block;font-size:.85em;color:var(--text-secondary);margin-bottom:4px}
 .modal-form .field{margin-bottom:14px;text-align:left}
 .modal-form .options{display:flex;margin-bottom:16px;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden}
@@ -937,14 +940,11 @@ function renderMain(){
           <button class="theme-toggle" onclick="toggleTheme()" title="${state.theme==='dark'?'Light mode':'Dark mode'}" aria-label="Toggle theme">${state.theme==='dark'?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>'}</button>
         </div>
         <div class="profile-section">
-          <div style="display:flex;align-items:center;gap:10px;cursor:pointer" onclick="openSettingsPage()">
-            <span class="avatar" style="margin-right:0;background:${avatarBg(state.user.pk)};color:#fff;border:none">${(state.user.name||'?')[0].toUpperCase()}</span>
-            <div style="flex:1;min-width:0">
-              <div class="pname">${escapeHtml(state.user.name||'Anon')}</div>
-              <div class="npub" style="cursor:pointer" onclick="event.stopPropagation();copyNpub()" title="Click to copy">${state.user.npub.slice(0,12)}…</div>
-            </div>
-            <button onclick="event.stopPropagation();logout()" style="background:none;border:none;color:var(--text-tertiary);cursor:pointer;padding:6px;font-size:1.1em;flex-shrink:0" title="Logout" aria-label="Logout">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          <div class="profile-row" onclick="openSettingsPage()">
+            <span class="avatar" style="background:${avatarBg(state.user.pk)};color:#fff">${(state.user.name||'?')[0].toUpperCase()}</span>
+            <span class="pname" style="flex:1;min-width:0">${escapeHtml(state.user.name||'Anon')}</span>
+            <button class="logout-icon" onclick="event.stopPropagation();logout()" title="Logout" aria-label="Logout">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
             </button>
           </div>
         </div>
@@ -1041,7 +1041,7 @@ function renderChatArea(){
       <div class="chat-header">
         <div style="display:flex;align-items:center;">
           <button class="mobile-menu-btn" onclick="toggleSidebar()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
-          <div><div class="channel-name" style="cursor:pointer" onclick="openSettings('${state.activeGroup}')"># ${escapeHtml(state.activeChannelName||'general')}</div>
+          <div><div class="channel-name"><span class="saloon-name-link" style="font-size:.8em;font-weight:400;color:var(--text-tertiary);cursor:pointer" onclick="openSettings('${state.activeGroup}')">${escapeHtml((state.groups.find(g=>g.id===state.activeGroup)||{}).name||'Saloon')}</span> <span style="color:var(--text-tertiary);font-weight:400">›</span> <span style="font-weight:600">#${escapeHtml(state.activeChannelName||'general')}</span></div>
           <div class="channel-desc">${escapeHtml(state.activeChannelDesc||'')}</div></div>
         </div>
         <div class="chat-header-actions">
@@ -1057,8 +1057,8 @@ function renderChatArea(){
       ${state.mentionQuery?renderMentionPopup():''}
       ${state.replyingTo?`<div class="reply-preview-bar"><span>Replying to: <strong>${escapeHtml((state.replyingToContent||'').slice(0,40))}</strong></span><button class="cancel-reply" onclick="cancelReply()">✕</button></div>`:''}
       <div class="msg-input">
-        <textarea id="msgText" rows="1" placeholder="Type your message..." oninput="onMsgInput(this.value);autoResize(this)" onkeydown="onMsgKeydown(event)">${state.editingMessageId?(state.messages.find(m=>m.id===state.editingMessageId)?.content||''):''}</textarea>
-        <button onclick="sendMsg()">Send</button>
+        <textarea id="msgText" rows="1" placeholder="Message #${escapeHtml(state.activeChannelName||'general')}" oninput="onMsgInput(this.value);autoResize(this)" onkeydown="onMsgKeydown(event)">${state.editingMessageId?(state.messages.find(m=>m.id===state.editingMessageId)?.content||''):''}</textarea>
+        <button onclick="sendMsg()" title="Send" aria-label="Send"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
       </div>`;
   }
   if(state.activeDM){
@@ -1073,7 +1073,7 @@ function renderChatArea(){
       ${state.atBottom?'':`<button class="scroll-bottom-btn" id="scrollBottomBtn" onclick="scrollToBottom()">↓</button>`}
       <div class="msg-input">
         <textarea id="msgText" rows="1" placeholder="Type a DM..." oninput="autoResize(this)" onkeydown="onDMMsgKeydown(event)"></textarea>
-        <button onclick="sendDMMsg()">Send</button>
+        <button onclick="sendDMMsg()" title="Send" aria-label="Send"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
       </div>`;
   }
   return `
@@ -1155,10 +1155,10 @@ function renderKeyBackup(){
     <h1>Save your keys</h1>
     <p>No email, no password — just these keys. Save them somewhere safe. Lose your secret key, lose your account.</p>
     <div class="key-display"><div class="label">Public key (share this)</div>${state.user.npub}</div>
-    <div class="key-display"><div class="label">Secret key (NEVER share this)</div>${state.user.nsec||'(imported — you have it)'}</div>
-    ${state.user.nsec?'<button onclick="copyNsec()" style="display:inline-flex;align-items:center;gap:6px;padding:12px 24px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy secret key</button>':''}
-    <div class="warning">Anyone with your secret key IS you. Guard it.</div>
-    <button style="margin-top:16px" onclick="finishKeyBackup()">I saved it — let me in</button>
+    <div class="key-display secret"><div class="label">⚠ This is your secret key</div>${state.user.nsec||'(imported — you have it)'}</div>
+    <div class="key-warning"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Anyone with this key controls your account. Guard it.</div>
+    ${state.user.nsec?'<button class="copy-btn" onclick="copyNsec()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy secret key</button>':''}
+    <button class="solid-btn" onclick="finishKeyBackup()">I saved it — let me in</button>
   </div>`;
 }
 
