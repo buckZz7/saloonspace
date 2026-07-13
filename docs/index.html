@@ -22,17 +22,21 @@
 <link href="https://fonts.googleapis.com/css2?family=Rye&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <!-- nostr-bundle.js: nostr-tools v1.17.0 IIFE — exports SimplePool, finishEvent, generatePrivateKey, getPublicKey, nip19 -->
 <script src="nostr-bundle.js"></script>
+<script>
+// Ensure NostrTools is available before module loads
+window.__NT = window.NostrTools;
+</script>
 <!-- NIP-17 DMs use NIP-44 encryption which needs @noble/curves for ECDH.
      Loaded async — DMs gracefully degrade to NIP-04 if this fails to load. -->
 <script>
 // Dynamic import — non-blocking, won't break the app if it fails
 try{import('https://cdn.jsdelivr.net/npm/@noble/curves@1.6.0/+esm').then(m=>{window.__nobleSecp256k1=m.secp256k1}).catch(()=>{})}catch(e){}
 </script>
-  <script type="module" crossorigin src="./assets/index-CacCBGAo.js"></script>
+  <script type="module" crossorigin src="./assets/index-ClCMNeo4.js"></script>
   <link rel="modulepreload" crossorigin href="./assets/rolldown-runtime-D3qAFmwF.js">
-  <link rel="modulepreload" crossorigin href="./assets/nostr-B0wRXitD.js">
+  <link rel="modulepreload" crossorigin href="./assets/nostr-nqywX7b9.js">
   <link rel="modulepreload" crossorigin href="./assets/utils-BQA0BBR_.js">
-  <link rel="modulepreload" crossorigin href="./assets/user-BTxPDw7n.js">
+  <link rel="modulepreload" crossorigin href="./assets/user-BIEZck7w.js">
   <link rel="stylesheet" crossorigin href="./assets/index-D-SsLuSc.css">
 </head>
 <body>
